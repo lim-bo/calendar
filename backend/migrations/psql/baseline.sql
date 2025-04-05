@@ -5,7 +5,7 @@ CREATE TABLE "profiles" (
     "second_name" TEXT NOT NULL,
     "third_name" TEXT NOT NULL,
     "position" TEXT NOT NULL,
-    "department" TEXT NOT NULL
+    "department" TEXT NOT NULL,
     PRIMARY KEY("uid")
 );
 
