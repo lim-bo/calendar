@@ -20,7 +20,7 @@ func TestRegister(t *testing.T) {
 	}
 	um := usermanager.New(cfg)
 	testCreds := &models.UserCredentialsRegister{
-		MainCreds: models.UserCredentials{
+		UserCredentials: models.UserCredentials{
 			Email: "testmail@gmail.com",
 			Pass:  "secretPassword",
 		},

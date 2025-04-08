@@ -55,7 +55,7 @@ func New(cfg DBConfig) *UserManager {
 
 func (um *UserManager) Register(creds *models.UserCredentialsRegister) error {
 
-	hashpass, err := util.Hash(creds.MainCreds.Pass)
+	hashpass, err := util.Hash(creds.Pass)
 	if err != nil {
 		return ErrInternal
 	}
@@ -64,7 +64,7 @@ func (um *UserManager) Register(creds *models.UserCredentialsRegister) error {
 	defer cancel()
 	um.mu.Lock()
 	_, err = um.pool.Exec(ctx, `INSERT INTO profiles (uid, mail, password,  first_name, second_name, third_name, position, department) VALUES
-($1, $2, $3, $4, $5, $6, $7, $8);`, uid, creds.MainCreds.Email, string(hashpass), creds.FirstName, creds.SecondName, creds.ThirdName, creds.Position, creds.Department)
+($1, $2, $3, $4, $5, $6, $7, $8);`, uid, creds.Email, string(hashpass), creds.FirstName, creds.SecondName, creds.ThirdName, creds.Position, creds.Department)
 	um.mu.Unlock()
 	if err != nil {
 		var pgerr pgx.PgError

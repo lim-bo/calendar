@@ -2,3 +2,5 @@ examples
 .vscode
 backend/config
 backend/deploy/.env
+backend/bin
+backend/Makefile
