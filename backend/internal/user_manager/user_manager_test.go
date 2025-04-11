@@ -69,6 +69,59 @@ func TestLogin(t *testing.T) {
 	t.Log("uuid: ", uid)
 }
 
+func TestLoginAndUpdate(t *testing.T) {
+	cfg := usermanager.DBConfig{
+		Host:     viper.GetString("users_db_host"),
+		Port:     viper.GetString("users_db_port"),
+		DBName:   viper.GetString("users_db_name"),
+		User:     viper.GetString("users_db_user"),
+		Password: viper.GetString("users_db_pass"),
+	}
+
+	um := usermanager.New(cfg)
+	uid, err := um.Login(&models.UserCredentials{
+		Email: "testmail@gmail.com",
+		Pass:  "secretPassword",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	testCreds := &models.UserCredentialsRegister{
+		FirstName:  "NeIvan",
+		SecondName: "NeIvanov",
+		ThirdName:  "NeIvanovich",
+		Department: "Some Department",
+		Position:   "cleaner",
+	}
+	err = um.UpdateUser(testCreds, uid)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoginAndChangePassword(t *testing.T) {
+	cfg := usermanager.DBConfig{
+		Host:     viper.GetString("users_db_host"),
+		Port:     viper.GetString("users_db_port"),
+		DBName:   viper.GetString("users_db_name"),
+		User:     viper.GetString("users_db_user"),
+		Password: viper.GetString("users_db_pass"),
+	}
+	um := usermanager.New(cfg)
+	uid, err := um.Login(&models.UserCredentials{
+		Email: "testmail@gmail.com",
+		Pass:  "secretPassword",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = um.ChangePassword("nonsecretPassword", uid)
+	if err != nil {
+		t.Error(err)
+	}
+
+}
+
 func TestMain(m *testing.M) {
 	util.LoadConfig()
 	m.Run()

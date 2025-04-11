@@ -79,9 +79,9 @@ func (um *UserManager) Register(creds *models.UserCredentialsRegister) error {
 func (um *UserManager) Login(creds *models.UserCredentials) (uuid.UUID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
-	um.mu.Lock()
+	um.mu.RLock()
 	row := um.pool.QueryRow(ctx, `SELECT uid, password FROM profiles p WHERE p.mail = $1;`, creds.Email)
-	um.mu.Unlock()
+	um.mu.RUnlock()
 	var uidStr, hashpass string
 	err := row.Scan(&uidStr, &hashpass)
 	if err != nil {
@@ -99,4 +99,28 @@ func (um *UserManager) Login(creds *models.UserCredentials) (uuid.UUID, error) {
 		return uuid.UUID{}, err
 	}
 	return uid, nil
+}
+
+func (um *UserManager) UpdateUser(newCreds *models.UserCredentialsRegister, uid uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	um.mu.Lock()
+	defer um.mu.Unlock()
+	_, err := um.pool.Exec(ctx, `UPDATE profiles SET first_name = $1, second_name = $2, third_name = $3,
+position = $4, department = $5 WHERE uid = $6;`, newCreds.FirstName, newCreds.SecondName, newCreds.ThirdName,
+		newCreds.Position, newCreds.Department, uid)
+	return err
+}
+
+func (um *UserManager) ChangePassword(newPass string, uid uuid.UUID) error {
+	passHash, err := util.Hash(newPass)
+	if err != nil {
+		return ErrInternal
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	um.mu.Lock()
+	defer um.mu.Unlock()
+	_, err = um.pool.Exec(ctx, `UPDATE profiles SET password = $1 WHERE uid = $2;`, string(passHash), uid)
+	return err
 }
