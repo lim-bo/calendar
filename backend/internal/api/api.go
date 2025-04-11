@@ -24,6 +24,8 @@ var (
 type UserManagerI interface {
 	Register(creds *models.UserCredentialsRegister) error
 	Login(creds *models.UserCredentials) (uuid.UUID, error)
+	UpdateUser(newCreds *models.UserCredentialsRegister, uid uuid.UUID) error
+	ChangePassword(newPass string, uid uuid.UUID) error
 }
 
 type API struct {
@@ -54,6 +56,7 @@ func (api *API) MountEndpoint() {
 		r.Use(api.CORSMiddleware)
 		r.Post("/login", api.Login)
 		r.Post("/register", api.Register)
+		r.Patch("/{uid}/update", api.UpdateUser)
 	})
 }
 
