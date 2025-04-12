@@ -1,8 +1,8 @@
 package models
 
 type UserCredentials struct {
-	Email string `json:"mail"`
-	Pass  string `json:"pass"`
+	Email string `json:"mail,omitempty"`
+	Pass  string `json:"pass,omitempty"`
 }
 
 type UserCredentialsRegister struct {

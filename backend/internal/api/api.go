@@ -57,6 +57,7 @@ func (api *API) MountEndpoint() {
 		r.Post("/login", api.Login)
 		r.Post("/register", api.Register)
 		r.Patch("/{uid}/update", api.UpdateUser)
+		r.Patch("/{uid}/changepass", api.ChangePassword)
 	})
 }
 

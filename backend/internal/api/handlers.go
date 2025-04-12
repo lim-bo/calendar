@@ -39,6 +39,7 @@ func (api *API) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) Register(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var creds models.UserCredentialsRegister
 	err := sonic.ConfigDefault.NewDecoder(r.Body).Decode(&creds)
 	defer r.Body.Close()
@@ -66,6 +67,7 @@ func (api *API) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	uidStr := r.PathValue("uid")
 	if uidStr == "" {
 		slog.Error("lack of uid in pathvalues", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/update"))
@@ -102,10 +104,54 @@ func (api *API) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		slog.String("endpoint", "/users/{uid}/update"))
 }
 
+func (api *API) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	uidStr := r.PathValue("uid")
+	if uidStr == "" {
+		slog.Error("lack of uid in pathvalues", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/changepass"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	uid, err := uuid.Parse(uidStr)
+	if err != nil {
+		slog.Error("wrong uid in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/changepass"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	newPass := make(map[string]interface{}, 1)
+	sonic.ConfigDefault.NewDecoder(r.Body).Decode(&newPass)
+	pass, ok := newPass["pass"]
+	if !ok {
+		slog.Error("lack of new password in request body", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/changepass"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	passStr, ok := pass.(string)
+	if !ok {
+		slog.Error("incompatible data in request body", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/changepass"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	err = api.um.ChangePassword(passStr, uid)
+	if err != nil {
+		slog.Error("repository error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr),
+			slog.String("endpoint", "/users/{uid}/changepass"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	slog.Info("successful changing password", slog.String("uid", uidStr), slog.String("from", r.RemoteAddr),
+		slog.String("endpoint", "/users/{uid}/changepass"))
+}
+
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, PATCH")
 		next.ServeHTTP(w, r)
 	})
 }
