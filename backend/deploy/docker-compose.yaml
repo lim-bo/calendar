@@ -20,6 +20,17 @@ services:
     restart: unless-stopped
     networks:
       - default
-
+  mongodb:
+    image: mongo:6.0
+    container_name: calendar_mongo_container
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    volumes:
+      - calend_mongodata:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
 volumes:
   calend_pgdata:
+  calend_mongodata:
