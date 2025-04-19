@@ -19,7 +19,7 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     restart: unless-stopped
     networks:
-      - default
+      - servicenet
   mongodb:
     image: mongo:6.0
     container_name: calendar_mongo_container
@@ -31,6 +31,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
+    networks:
+      - servicenet
 volumes:
   calend_pgdata:
   calend_mongodata:
+
+networks:
+  servicenet:
