@@ -129,8 +129,8 @@ func (um *UserManager) GetProfileInfo(uid uuid.UUID) (*models.UserCredentialsReg
 	var userinfo models.UserCredentialsRegister
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
-	err := um.pool.QueryRow(ctx, `SELECT first_name, second_name, third_name, position, department FROM profiles WHERE uid = $1;`,
-		uid).Scan(userinfo.FirstName, userinfo.SecondName, userinfo.ThirdName, userinfo.Position, userinfo.Department)
+	err := um.pool.QueryRow(ctx, `SELECT mail, first_name, second_name, third_name, position, department FROM profiles WHERE uid = $1;`,
+		uid).Scan(&userinfo.Email, &userinfo.FirstName, &userinfo.SecondName, &userinfo.ThirdName, &userinfo.Position, &userinfo.Department)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, ErrUnregistered

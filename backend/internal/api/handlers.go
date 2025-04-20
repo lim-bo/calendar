@@ -148,10 +148,38 @@ func (api *API) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		slog.String("endpoint", "/users/{uid}/changepass"))
 }
 
+func (api *API) GetUserInfo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	uidStr := r.PathValue("uid")
+	if uidStr == "" {
+		slog.Error("lack of uid in pathvalues", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/profile"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	uid, err := uuid.Parse(uidStr)
+	if err != nil {
+		slog.Error("wrong uid in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/profile"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	info, err := api.um.GetProfileInfo(uid)
+	if err != nil {
+		slog.Error("getting profile error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/profile"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	WriteGetProfileResponse(w, info)
+	slog.Info("successful get profile request", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/profile"), slog.String("uid", uid.String()))
+
+}
+
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, PATCH")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, PATCH, GET")
 		next.ServeHTTP(w, r)
 	})
 }

@@ -21,8 +21,8 @@ func TestRegister(t *testing.T) {
 	um := usermanager.New(cfg)
 	testCreds := &models.UserCredentialsRegister{
 		UserCredentials: models.UserCredentials{
-			Email: "testmail@gmail.com",
-			Pass:  "secretPassword",
+			Email: "aaa",
+			Pass:  "bbb",
 		},
 		FirstName:  "Ivan",
 		SecondName: "Ivanov",
@@ -125,4 +125,27 @@ func TestLoginAndChangePassword(t *testing.T) {
 func TestMain(m *testing.M) {
 	util.LoadConfig()
 	m.Run()
+}
+
+func TestLoginAndGetProfile(t *testing.T) {
+	cfg := usermanager.DBConfig{
+		Host:     viper.GetString("users_db_host"),
+		Port:     viper.GetString("users_db_port"),
+		DBName:   viper.GetString("users_db_name"),
+		User:     viper.GetString("users_db_user"),
+		Password: viper.GetString("users_db_pass"),
+	}
+	um := usermanager.New(cfg)
+	uid, err := um.Login(&models.UserCredentials{
+		Email: "testmail@gmail.com",
+		Pass:  "secretPassword",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := um.GetProfileInfo(uid)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(*info)
 }

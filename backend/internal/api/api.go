@@ -26,6 +26,7 @@ type UserManagerI interface {
 	Login(creds *models.UserCredentials) (uuid.UUID, error)
 	UpdateUser(newCreds *models.UserCredentialsRegister, uid uuid.UUID) error
 	ChangePassword(newPass string, uid uuid.UUID) error
+	GetProfileInfo(uid uuid.UUID) (*models.UserCredentialsRegister, error)
 }
 
 type API struct {
@@ -56,8 +57,9 @@ func (api *API) MountEndpoint() {
 		r.Use(api.CORSMiddleware)
 		r.Post("/login", api.Login)
 		r.Post("/register", api.Register)
-		r.Patch("/{uid}/update", api.UpdateUser)
-		r.Patch("/{uid}/changepass", api.ChangePassword)
+		r.Post("/{uid}/update", api.UpdateUser)
+		r.Post("/{uid}/changepass", api.ChangePassword)
+		r.Get("/{uid}/profile", api.GetUserInfo)
 	})
 }
 
