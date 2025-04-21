@@ -11,7 +11,6 @@ import (
 )
 
 func (api *API) Login(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	var creds models.UserCredentials
 	err := sonic.ConfigDefault.NewDecoder(r.Body).Decode(&creds)
 	defer r.Body.Close()
@@ -39,7 +38,6 @@ func (api *API) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) Register(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	var creds models.UserCredentialsRegister
 	err := sonic.ConfigDefault.NewDecoder(r.Body).Decode(&creds)
 	defer r.Body.Close()
@@ -67,7 +65,6 @@ func (api *API) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	uidStr := r.PathValue("uid")
 	if uidStr == "" {
 		slog.Error("lack of uid in pathvalues", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/update"))
@@ -105,7 +102,6 @@ func (api *API) UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) ChangePassword(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	uidStr := r.PathValue("uid")
 	if uidStr == "" {
 		slog.Error("lack of uid in pathvalues", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/changepass"))
@@ -121,7 +117,14 @@ func (api *API) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	newPass := make(map[string]interface{}, 1)
-	sonic.ConfigDefault.NewDecoder(r.Body).Decode(&newPass)
+	err = sonic.ConfigDefault.NewDecoder(r.Body).Decode(&newPass)
+	defer r.Body.Close()
+	if err != nil {
+		slog.Error("error unmarshalling json", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/changepass"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
 	pass, ok := newPass["pass"]
 	if !ok {
 		slog.Error("lack of new password in request body", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/changepass"))
@@ -149,7 +152,6 @@ func (api *API) ChangePassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) GetUserInfo(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	uidStr := r.PathValue("uid")
 	if uidStr == "" {
 		slog.Error("lack of uid in pathvalues", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/{uid}/profile"))
@@ -176,10 +178,30 @@ func (api *API) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (api *API) AddEvent(w http.ResponseWriter, r *http.Request) {
+	var event models.Event
+	err := sonic.ConfigDefault.NewDecoder(r.Body).Decode(&event)
+	defer r.Body.Close()
+	if err != nil {
+		slog.Error("error unmarshalling json", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	err = api.em.AddEvent(&event)
+	if err != nil {
+		slog.Error("event insertion error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+	}
+	slog.Info("event successfuly added", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"), slog.String("uid", event.Master.String()))
+}
+
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, PATCH, GET")
+		w.Header().Set("Content-Type", "application/json")
 		next.ServeHTTP(w, r)
 	})
 }

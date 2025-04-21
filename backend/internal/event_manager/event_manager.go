@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lim-bo/calendar/backend/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -24,7 +25,7 @@ type DBConfig struct {
 	Password string
 }
 
-func New(cfg *DBConfig) *EventManager {
+func New(cfg DBConfig) *EventManager {
 	connUrl := "mongodb://" + cfg.User + ":" + cfg.Password + "@" + cfg.Host + ":" + cfg.Port
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(connUrl).SetConnectTimeout(time.Second*5))
 	if err != nil {
@@ -51,11 +52,21 @@ func (em *EventManager) GetEventsByMonth(master uuid.UUID, month time.Month) ([]
 	return result, nil
 }
 
+func (em *EventManager) GetEventsByWeek(master uuid.UUID, weekStart time.Time) ([]*models.Event, error) {
+	var result []*models.Event
+
+	return result, nil
+}
+
+func (em *EventManager) GetEventsByDay(master uuid.UUID, day time.Time) ([]*models.Event, error) {
+	var result []*models.Event
+
+	return result, nil
+}
+
 func (em *EventManager) GetEvents(master uuid.UUID) ([]*models.Event, error) {
 	result := make([]*models.Event, 0, 2)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-	defer cancel()
-	cursor, err := em.cli.Database("calend_db").Collection("events").Find(ctx, bson.M{"master": master.String()})
+	cursor, err := em.cli.Database("calend_db").Collection("events").Find(context.Background(), bson.M{"master": master})
 	if err != nil {
 		return nil, errors.New("searching docs error: " + err.Error())
 	}
@@ -70,7 +81,10 @@ func (em *EventManager) GetEvents(master uuid.UUID) ([]*models.Event, error) {
 	return result, nil
 }
 
-func (em *EventManager) DeleteEvent(master uuid.UUID, name string) error {
-
+func (em *EventManager) DeleteEvent(master uuid.UUID, id primitive.ObjectID) error {
+	_, err := em.cli.Database("calend_db").Collection("events").DeleteOne(context.Background(), bson.M{"master": master, "_id": id})
+	if err != nil {
+		return errors.New("deleting event error: " + err.Error())
+	}
 	return nil
 }
