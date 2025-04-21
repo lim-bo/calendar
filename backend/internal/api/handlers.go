@@ -3,6 +3,8 @@ package api
 import (
 	"log/slog"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/bytedance/sonic"
 	"github.com/google/uuid"
@@ -197,10 +199,49 @@ func (api *API) AddEvent(w http.ResponseWriter, r *http.Request) {
 	slog.Info("event successfuly added", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"), slog.String("uid", event.Master.String()))
 }
 
+func (api *API) GetEventsByMonth(w http.ResponseWriter, r *http.Request) {
+	uidStr := r.PathValue("uid")
+	if uidStr == "" {
+		slog.Error("lack of uid in pathvalues", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/month"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	uid, err := uuid.Parse(uidStr)
+	if err != nil {
+		slog.Error("wrong uid in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/month"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	month, err := strconv.Atoi(r.URL.Query().Get("month"))
+	if err != nil || month < 1 || month > 12 {
+		slog.Error("invalid query month param", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/month"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	events, err := api.em.GetEventsByMonth(uid, time.Month(month))
+	if err != nil {
+		slog.Error("getting events by month error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/month"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	err = sonic.ConfigFastest.NewEncoder(w).Encode(map[string]interface{}{"events": events, "cod": 200})
+	if err != nil {
+		slog.Error("error marshalling events result", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/month"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrResponse)
+		return
+	}
+	slog.Info("successfuly provided events data", slog.String("uid", uidStr), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/month"))
+}
+
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, PATCH, GET")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET")
 		w.Header().Set("Content-Type", "application/json")
 		next.ServeHTTP(w, r)
 	})

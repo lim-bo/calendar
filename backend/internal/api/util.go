@@ -35,7 +35,7 @@ func WriteLoginResponse(w http.ResponseWriter, uid uuid.UUID) {
 }
 
 func WriteGetProfileResponse(w http.ResponseWriter, info *models.UserCredentialsRegister) {
-	err := sonic.ConfigDefault.NewEncoder(w).Encode(*info)
+	err := sonic.ConfigDefault.NewEncoder(w).Encode(info)
 	if err != nil {
 		slog.Error("sending profile info error", slog.String("error_value", err.Error()))
 	}

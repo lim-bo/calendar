@@ -22,6 +22,7 @@ var (
 	ErrBadRequest      = errors.New("invalid request")
 	ErrRepository      = errors.New("error while fetching db")
 	ErrLogin           = errors.New("unregistered or wrong credentials")
+	ErrResponse        = errors.New("error while responsing")
 )
 
 type UserManagerI interface {
@@ -82,6 +83,7 @@ func (api *API) MountEndpoint() {
 	api.r.Route("/events", func(r chi.Router) {
 		r.Use(api.CORSMiddleware)
 		r.Post("/add", api.AddEvent)
+		r.Get("/{uid}/month", api.GetEventsByMonth)
 	})
 }
 

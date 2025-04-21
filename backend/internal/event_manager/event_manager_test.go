@@ -41,6 +41,7 @@ func TestAddEvent(t *testing.T) {
 		Start:        time.Now(),
 		End:          time.Now().Add(time.Hour * 24),
 		Participants: []uuid.UUID{uid},
+		Prior:        models.PriorityHigh,
 	}
 	err := em.AddEvent(event)
 	if err != nil {
