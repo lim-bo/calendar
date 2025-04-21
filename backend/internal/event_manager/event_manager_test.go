@@ -35,7 +35,7 @@ func TestAddEvent(t *testing.T) {
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
 	event := &models.Event{
 		Master:       uid,
-		Name:         "test event",
+		Name:         "test event 3",
 		Description:  "тусняк висняк",
 		Type:         "TUSA",
 		Start:        time.Now(),
@@ -65,6 +65,7 @@ func TestGetEvents(t *testing.T) {
 	for _, e := range events {
 		t.Log(*e)
 	}
+
 }
 
 func TestDeleteEvent(t *testing.T) {
@@ -83,5 +84,28 @@ func TestDeleteEvent(t *testing.T) {
 	err = em.DeleteEvent(uid, id)
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestGetEventsByMonth(t *testing.T) {
+	cfg := eventmanager.DBConfig{
+		Host:     viper.GetString("events_db_host"),
+		Port:     viper.GetString("events_db_port"),
+		User:     viper.GetString("events_db_user"),
+		Password: viper.GetString("events_db_pass"),
+	}
+	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
+	em := eventmanager.New(cfg)
+	events, err := em.GetEventsByMonth(uid, time.April)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(events) == 0 {
+		t.Error("empty slice")
+	} else {
+		t.Log(len(events))
+	}
+	for _, e := range events {
+		t.Log(*e)
 	}
 }

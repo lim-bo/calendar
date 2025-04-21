@@ -48,7 +48,27 @@ func (em *EventManager) AddEvent(event *models.Event) error {
 
 func (em *EventManager) GetEventsByMonth(master uuid.UUID, month time.Month) ([]*models.Event, error) {
 	var result []*models.Event
-
+	dateStart := time.Date(time.Now().Year(), month, 1, 0, 0, 0, 0, time.UTC)
+	dateEnd := time.Date(time.Now().Year(), month+time.Month(1), 0, 0, 0, 0, 0, time.UTC)
+	cursor, err := em.cli.Database("calend_db").Collection("events").Find(context.Background(), bson.M{
+		"start": bson.M{
+			"$gte": dateStart,
+		},
+		"end": bson.M{
+			"$lt": dateEnd,
+		},
+	})
+	if err != nil {
+		return nil, errors.New("error getting events by month: " + err.Error())
+	}
+	defer cursor.Close(context.Background())
+	var event models.Event
+	for cursor.Next(context.Background()) {
+		if err = cursor.Decode(&event); err != nil {
+			return nil, errors.New("decoding event error: " + err.Error())
+		}
+		result = append(result, &event)
+	}
 	return result, nil
 }
 
@@ -66,13 +86,13 @@ func (em *EventManager) GetEventsByDay(master uuid.UUID, day time.Time) ([]*mode
 
 func (em *EventManager) GetEvents(master uuid.UUID) ([]*models.Event, error) {
 	result := make([]*models.Event, 0, 2)
-	cursor, err := em.cli.Database("calend_db").Collection("events").Find(context.Background(), bson.M{"master": master})
+	cursor, err := em.cli.Database("calend_db").Collection("events").Find(context.Background(), bson.M{"parts": master})
 	if err != nil {
 		return nil, errors.New("searching docs error: " + err.Error())
 	}
 	defer cursor.Close(context.Background())
+	var event models.Event
 	for cursor.Next(context.Background()) {
-		var event models.Event
 		if err = cursor.Decode(&event); err != nil {
 			return nil, errors.New("decoding event error: " + err.Error())
 		}
