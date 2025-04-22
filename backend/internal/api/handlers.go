@@ -238,6 +238,10 @@ func (api *API) GetEventsByMonth(w http.ResponseWriter, r *http.Request) {
 	slog.Info("successfuly provided events data", slog.String("uid", uidStr), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/month"))
 }
 
+func (api *API) GetEventsByWeek(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

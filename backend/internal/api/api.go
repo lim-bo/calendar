@@ -84,6 +84,7 @@ func (api *API) MountEndpoint() {
 		r.Use(api.CORSMiddleware)
 		r.Post("/add", api.AddEvent)
 		r.Get("/{uid}/month", api.GetEventsByMonth)
+		r.Get("/{uid}/week", api.GetEventsByWeek)
 	})
 }
 
