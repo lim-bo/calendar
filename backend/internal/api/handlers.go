@@ -239,6 +239,35 @@ func (api *API) GetEventsByMonth(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) GetEventsByWeek(w http.ResponseWriter, r *http.Request) {
+	uidStr := r.PathValue("uid")
+	if uidStr == "" {
+		slog.Error("lack of uid in pathvalues", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/week"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	uid, err := uuid.Parse(uidStr)
+	if err != nil {
+		slog.Error("wrong uid in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/week"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	events, err := api.em.GetEventsByWeek(uid)
+	if err != nil {
+		slog.Error("getting events by week error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/week"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	err = sonic.ConfigFastest.NewEncoder(w).Encode(map[string]interface{}{"events": events, "cod": 200})
+	if err != nil {
+		slog.Error("error marshalling events result", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/week"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrResponse)
+		return
+	}
+	slog.Info("successfuly provided events data", slog.String("uid", uidStr), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/week"))
 
 }
 

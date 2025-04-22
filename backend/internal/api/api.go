@@ -38,6 +38,8 @@ type EventManagerI interface {
 	GetEvents(master uuid.UUID) ([]*models.Event, error)
 	GetEventsByMonth(master uuid.UUID, month time.Month) ([]*models.Event, error)
 	DeleteEvent(master uuid.UUID, id primitive.ObjectID) error
+	GetEventsByWeek(master uuid.UUID) ([]*models.Event, error)
+	GetEventsByDay(master uuid.UUID, day time.Time) ([]*models.Event, error)
 }
 
 type API struct {
