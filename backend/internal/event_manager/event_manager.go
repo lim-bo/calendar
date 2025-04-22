@@ -107,8 +107,25 @@ func (em *EventManager) GetEventsByWeek(master uuid.UUID) ([]*models.Event, erro
 }
 
 func (em *EventManager) GetEventsByDay(master uuid.UUID, day time.Time) ([]*models.Event, error) {
-	var result []*models.Event
-
+	day = time.Date(day.Year(), day.Month(), day.Day(), 0, 0, 0, 0, day.Location())
+	nextDay := day.Add(time.Hour * 24)
+	cursor, err := em.cli.Database("calend_db").Collection("events").Find(context.Background(), bson.M{
+		"$and": []bson.M{
+			{"start": bson.M{"$lte": nextDay}},
+			{"end": bson.M{"$gte": day}},
+		},
+		"parts": master,
+	})
+	if err != nil {
+		return nil, errors.New("errors getting events by day: " + err.Error())
+	}
+	defer cursor.Close(context.Background())
+	result := make([]*models.Event, 0, cursor.RemainingBatchLength())
+	for cursor.Next(context.Background()) {
+		var event models.Event
+		cursor.Decode(&event)
+		result = append(result, &event)
+	}
 	return result, nil
 }
 

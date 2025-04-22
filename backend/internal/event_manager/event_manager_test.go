@@ -134,3 +134,27 @@ func TestGetEventsByWeek(t *testing.T) {
 		t.Log(*e)
 	}
 }
+
+func TestGetEventsByDay(t *testing.T) {
+	cfg := eventmanager.DBConfig{
+		Host:     viper.GetString("events_db_host"),
+		Port:     viper.GetString("events_db_port"),
+		User:     viper.GetString("events_db_user"),
+		Password: viper.GetString("events_db_pass"),
+	}
+	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
+	em := eventmanager.New(cfg)
+	day := time.Date(time.Now().Year(), time.Now().Month(), 21, 0, 0, 0, 0, time.Now().Location())
+	events, err := em.GetEventsByDay(uid, day)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(events) == 0 {
+		t.Error("empty slice")
+	} else {
+		t.Log(len(events))
+	}
+	for _, e := range events {
+		t.Log(*e)
+	}
+}
