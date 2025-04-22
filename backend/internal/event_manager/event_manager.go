@@ -50,6 +50,7 @@ func (em *EventManager) GetEventsByMonth(master uuid.UUID, month time.Month) ([]
 	dateStart := time.Date(time.Now().Year(), month, 1, 0, 0, 0, 0, time.Now().Location())
 	dateEnd := time.Date(time.Now().Year(), month+time.Month(1), 1, 0, 0, 0, 0, time.Now().Location())
 	cursor, err := em.cli.Database("calend_db").Collection("events").Find(context.Background(), bson.M{
+		"parts": master,
 		"start": bson.M{
 			"$gte": dateStart,
 		},
@@ -89,6 +90,7 @@ func (em *EventManager) GetEventsByWeek(master uuid.UUID) ([]*models.Event, erro
 			{"start": bson.M{"$lte": weekEnd}},
 			{"end": bson.M{"$gte": weekStart}},
 		},
+		"parts": master,
 	}
 	cursor, err := em.cli.Database("calend_db").Collection("events").Find(context.Background(), filter)
 	if err != nil {
