@@ -271,6 +271,44 @@ func (api *API) GetEventsByWeek(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (api *API) GetEventsByDay(w http.ResponseWriter, r *http.Request) {
+	uidStr := r.PathValue("uid")
+	if uidStr == "" {
+		slog.Error("lack of uid in pathvalues", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/day"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	uid, err := uuid.Parse(uidStr)
+	if err != nil {
+		slog.Error("wrong uid in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/day"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	day, err := strconv.Atoi(r.URL.Query().Get("day"))
+	if err != nil || day < 1 || day > 31 {
+		slog.Error("invalid day query param", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/day"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	events, err := api.em.GetEventsByDay(uid, time.Date(time.Now().Year(), time.Now().Month(), day, 0, 0, 0, 0, time.Now().Location()))
+	if err != nil {
+		slog.Error("error getting events by day", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/day"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	err = sonic.ConfigFastest.NewEncoder(w).Encode(map[string]interface{}{"events": events, "cod": 200})
+	if err != nil {
+		slog.Error("error marshalling events result", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/day"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrResponse)
+		return
+	}
+	slog.Info("successfuly provided events by day", slog.String("uid", uidStr), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/day"))
+}
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
