@@ -183,8 +183,8 @@ func (api *API) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) AddEvent(w http.ResponseWriter, r *http.Request) {
-	var event models.Event
-	err := sonic.ConfigDefault.NewDecoder(r.Body).Decode(&event)
+	var eventRequest models.EventWithMails
+	err := sonic.ConfigDefault.NewDecoder(r.Body).Decode(&eventRequest)
 	defer r.Body.Close()
 	if err != nil {
 		slog.Error("error unmarshalling json", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"))
@@ -192,11 +192,28 @@ func (api *API) AddEvent(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
 		return
 	}
+	var event models.Event
+	uids, err := api.um.GetUUIDS(eventRequest.Participants)
+	if err != nil {
+		slog.Error("getting uids error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	event.Master = eventRequest.Master
+	event.Description = eventRequest.Description
+	event.Name = eventRequest.Name
+	event.Type = eventRequest.Type
+	event.Prior = eventRequest.Prior
+	event.Participants = append(uids, eventRequest.Master)
+	event.Start = eventRequest.Start
+	event.End = eventRequest.End
 	err = api.em.AddEvent(&event)
 	if err != nil {
 		slog.Error("event insertion error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"))
 		w.WriteHeader(http.StatusInternalServerError)
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
 	}
 	slog.Info("event successfuly added", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"), slog.String("uid", event.Master.String()))
 }

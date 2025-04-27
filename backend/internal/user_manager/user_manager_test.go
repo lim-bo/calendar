@@ -149,3 +149,21 @@ func TestLoginAndGetProfile(t *testing.T) {
 	}
 	t.Log(*info)
 }
+
+func TestGetUUIDS(t *testing.T) {
+	cfg := usermanager.DBConfig{
+		Host:     viper.GetString("users_db_host"),
+		Port:     viper.GetString("users_db_port"),
+		DBName:   viper.GetString("users_db_name"),
+		User:     viper.GetString("users_db_user"),
+		Password: viper.GetString("users_db_pass"),
+	}
+	um := usermanager.New(cfg)
+	uids, err := um.GetUUIDS([]string{"aaa", "mar@mail.ru"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, u := range uids {
+		t.Log(u)
+	}
+}
