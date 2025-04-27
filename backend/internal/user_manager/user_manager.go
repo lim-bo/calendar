@@ -139,3 +139,21 @@ func (um *UserManager) GetProfileInfo(uid uuid.UUID) (*models.UserCredentialsReg
 	}
 	return &userinfo, nil
 }
+
+func (um *UserManager) GetUUIDS(mails []string) ([]uuid.UUID, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	rows, err := um.pool.Query(ctx, `SELECT uid FROM profiles WHERE mail = ANY($1);`, mails)
+	if err != nil {
+		return nil, errors.New("error getting uids: " + err.Error())
+	}
+	result := make([]uuid.UUID, 0)
+	for rows.Next() {
+		var uid uuid.UUID
+		if err := rows.Scan(&uid); err != nil {
+			return nil, errors.New("error scanning values (uids): " + err.Error())
+		}
+		result = append(result, uid)
+	}
+	return result, nil
+}

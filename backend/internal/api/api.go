@@ -31,6 +31,7 @@ type UserManagerI interface {
 	UpdateUser(newCreds *models.UserCredentialsRegister, uid uuid.UUID) error
 	ChangePassword(newPass string, uid uuid.UUID) error
 	GetProfileInfo(uid uuid.UUID) (*models.UserCredentialsRegister, error)
+	GetUUIDS(mails []string) ([]uuid.UUID, error)
 }
 
 type EventManagerI interface {
