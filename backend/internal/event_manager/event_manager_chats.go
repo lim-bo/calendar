@@ -46,3 +46,15 @@ func (em *EventManager) GetMessages(eventID primitive.ObjectID) (*models.Chat, e
 	}
 	return &chat, nil
 }
+
+func (em *EventManager) DeleteChat(eventID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	_, err := em.cli.Database("calend_db").Collection("chats").DeleteOne(ctx, bson.M{
+		"event_id": eventID,
+	})
+	if err != nil {
+		return errors.New("error deleting chat: " + err.Error())
+	}
+	return nil
+}

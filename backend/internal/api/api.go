@@ -41,6 +41,10 @@ type EventManagerI interface {
 	DeleteEvent(master uuid.UUID, id primitive.ObjectID) error
 	GetEventsByWeek(master uuid.UUID) ([]*models.Event, error)
 	GetEventsByDay(master uuid.UUID, day time.Time) ([]*models.Event, error)
+
+	DeleteChat(eventID primitive.ObjectID) error
+	GetMessages(eventID primitive.ObjectID) (*models.Chat, error)
+	SendMessage(eventID primitive.ObjectID, msg models.Message) error
 }
 
 type API struct {
