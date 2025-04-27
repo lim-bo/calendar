@@ -16,6 +16,7 @@ import (
 
 var (
 	ErrLackOrWrongMaster = errors.New("event created by other user or event doesn't exist")
+	ErrNoSuchEvent       = errors.New("there is no event with such ID")
 )
 
 type EventManager struct {

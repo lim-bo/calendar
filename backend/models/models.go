@@ -40,3 +40,25 @@ type Event struct {
 	End          time.Time          `json:"end" bson:"end"`
 	Participants []uuid.UUID        `json:"parts" bson:"parts"`
 }
+
+type EventWithMails struct {
+	ID           primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Master       uuid.UUID          `json:"master" bson:"master"`
+	Name         string             `json:"name" bson:"name"`
+	Description  string             `json:"desc" bson:"desc"`
+	Type         string             `json:"type" bson:"type"`
+	Prior        Priority           `json:"prior" bson:"prior"`
+	Start        time.Time          `json:"start" bson:"start"`
+	End          time.Time          `json:"end" bson:"end"`
+	Participants []string           `json:"parts" bson:"parts"`
+}
+
+type Chat struct {
+	EventID  primitive.ObjectID `json:"event_id" bson:""`
+	Messages []Message          `json:"messages" bson:"messages"`
+}
+
+type Message struct {
+	Sender  uuid.UUID `json:"sender" bson:"sender"`
+	Content string    `json:"cont" bson:"cont"`
+}

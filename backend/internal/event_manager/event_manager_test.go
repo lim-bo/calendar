@@ -158,3 +158,24 @@ func TestGetEventsByDay(t *testing.T) {
 		t.Log(*e)
 	}
 }
+
+func TestSendMessage(t *testing.T) {
+	cfg := eventmanager.DBConfig{
+		Host:     viper.GetString("events_db_host"),
+		Port:     viper.GetString("events_db_port"),
+		User:     viper.GetString("events_db_user"),
+		Password: viper.GetString("events_db_pass"),
+	}
+	em := eventmanager.New(cfg)
+	objID, err := primitive.ObjectIDFromHex("680e312715e5c401ed91290a")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = em.SendMessage(objID, models.Message{
+		Sender:  uuid.MustParse("38cb4038-4b23-4953-88b7-1e75fe688b79"),
+		Content: "Some test message 1",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+}
