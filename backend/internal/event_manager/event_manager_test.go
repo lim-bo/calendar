@@ -179,3 +179,24 @@ func TestSendMessage(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetMessages(t *testing.T) {
+	cfg := eventmanager.DBConfig{
+		Host:     viper.GetString("events_db_host"),
+		Port:     viper.GetString("events_db_port"),
+		User:     viper.GetString("events_db_user"),
+		Password: viper.GetString("events_db_pass"),
+	}
+	em := eventmanager.New(cfg)
+	objID, err := primitive.ObjectIDFromHex("680e312715e5c401ed91290a")
+	if err != nil {
+		t.Fatal(err)
+	}
+	chat, err := em.GetMessages(objID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, msg := range chat.Messages {
+		t.Logf("message %d: %s", i+1, msg.Content)
+	}
+}
