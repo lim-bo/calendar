@@ -88,6 +88,7 @@ func (api *API) MountEndpoint() {
 		r.Get("/{uid}/month", api.GetEventsByMonth)
 		r.Get("/{uid}/week", api.GetEventsByWeek)
 		r.Get("/{uid}/day", api.GetEventsByDay)
+		r.Delete("/{uid}/delete", api.DeleteEvent)
 	})
 }
 

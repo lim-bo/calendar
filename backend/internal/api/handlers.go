@@ -8,8 +8,10 @@ import (
 
 	"github.com/bytedance/sonic"
 	"github.com/google/uuid"
+	eventmanager "github.com/lim-bo/calendar/backend/internal/event_manager"
 	usermanager "github.com/lim-bo/calendar/backend/internal/user_manager"
 	"github.com/lim-bo/calendar/backend/models"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (api *API) Login(w http.ResponseWriter, r *http.Request) {
@@ -309,6 +311,51 @@ func (api *API) GetEventsByDay(w http.ResponseWriter, r *http.Request) {
 	}
 	slog.Info("successfuly provided events by day", slog.String("uid", uidStr), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/day"))
 }
+
+func (api *API) DeleteEvent(w http.ResponseWriter, r *http.Request) {
+	uidStr := r.PathValue("uid")
+	if uidStr == "" {
+		slog.Error("lack of uid in pathvalues", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/delete"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	uid, err := uuid.Parse(uidStr)
+	if err != nil {
+		slog.Error("wrong uid in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/delete"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	obj := r.URL.Query().Get("id")
+	if obj == "" {
+		slog.Error("request with lack of event id", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/delete"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	id, err := primitive.ObjectIDFromHex(obj)
+	if err != nil {
+		slog.Error("request with invalid event id", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/delete"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+	}
+	err = api.em.DeleteEvent(uid, id)
+	if err != nil {
+		if err == eventmanager.ErrLackOrWrongMaster {
+			slog.Error("deletion request with unexisted event", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/delete"))
+			w.WriteHeader(http.StatusBadRequest)
+			WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+			return
+		}
+		slog.Error("deletion event error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/delete"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	slog.Info("successful event deletion", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/delete"), slog.String("uid", uidStr))
+}
+
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

@@ -14,6 +14,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var (
+	ErrLackOrWrongMaster = errors.New("event created by other user or event doesn't exist")
+)
+
 type EventManager struct {
 	cli *mongo.Client
 }
@@ -147,9 +151,12 @@ func (em *EventManager) GetEvents(master uuid.UUID) ([]*models.Event, error) {
 }
 
 func (em *EventManager) DeleteEvent(master uuid.UUID, id primitive.ObjectID) error {
-	_, err := em.cli.Database("calend_db").Collection("events").DeleteOne(context.Background(), bson.M{"master": master, "_id": id})
+	result, err := em.cli.Database("calend_db").Collection("events").DeleteOne(context.Background(), bson.M{"master": master, "_id": id})
 	if err != nil {
 		return errors.New("deleting event error: " + err.Error())
+	}
+	if result.DeletedCount == 0 {
+		return ErrLackOrWrongMaster
 	}
 	return nil
 }
