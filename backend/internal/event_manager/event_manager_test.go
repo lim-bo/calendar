@@ -37,7 +37,7 @@ func TestAddEvent(t *testing.T) {
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
 	event := &models.Event{
 		Master:       uid,
-		Name:         "test event 3",
+		Name:         "FOR UPDATE",
 		Description:  "тусняк висняк",
 		Type:         "TUSA",
 		Start:        timestamp,
@@ -218,6 +218,37 @@ func TestDeleteChat(t *testing.T) {
 		t.Fatal(err)
 	}
 	err = em.DeleteChat(objID)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestUpdateEvent(t *testing.T) {
+	cfg := eventmanager.DBConfig{
+		Host:     viper.GetString("events_db_host"),
+		Port:     viper.GetString("events_db_port"),
+		User:     viper.GetString("events_db_user"),
+		Password: viper.GetString("events_db_pass"),
+	}
+	objID, err := primitive.ObjectIDFromHex("680fd43950d2b42f701061c0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	em := eventmanager.New(cfg)
+	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
+	timestamp := time.Now().Add(time.Hour * 24 * 31)
+	event := &models.Event{
+		ID:           objID,
+		Master:       uid,
+		Name:         "FOR UPDATE",
+		Description:  "тусняк висняк",
+		Type:         "Чаепитие",
+		Start:        timestamp,
+		End:          timestamp.Add(time.Hour * 24),
+		Participants: []uuid.UUID{uid},
+		Prior:        models.PriorityHigh,
+	}
+	err = em.UpdateEvent(event)
 	if err != nil {
 		t.Error(err)
 	}

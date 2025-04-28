@@ -161,3 +161,26 @@ func (em *EventManager) DeleteEvent(master uuid.UUID, id primitive.ObjectID) err
 	}
 	return nil
 }
+
+func (em *EventManager) UpdateEvent(event *models.Event) error {
+	res, err := em.cli.Database("calend_db").Collection("events").UpdateOne(context.Background(), bson.M{
+		"_id": event.ID,
+	}, bson.M{
+		"$set": bson.M{
+			"name":  event.Name,
+			"desc":  event.Description,
+			"type":  event.Type,
+			"prior": event.Prior,
+			"start": event.Start,
+			"end":   event.End,
+			"parts": event.Participants,
+		},
+	})
+	if err != nil {
+		return errors.New("updating event error: " + err.Error())
+	}
+	if res.MatchedCount == 0 {
+		return ErrNoSuchEvent
+	}
+	return nil
+}
