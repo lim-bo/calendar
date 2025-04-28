@@ -200,14 +200,8 @@ func (api *API) AddEvent(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
 		return
 	}
-	event.Master = eventRequest.Master
-	event.Description = eventRequest.Description
-	event.Name = eventRequest.Name
-	event.Type = eventRequest.Type
-	event.Prior = eventRequest.Prior
+	event.EventBase = eventRequest.EventBase
 	event.Participants = append(uids, eventRequest.Master)
-	event.Start = eventRequest.Start
-	event.End = eventRequest.End
 	err = api.em.AddEvent(&event)
 	if err != nil {
 		slog.Error("event insertion error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"))
@@ -371,6 +365,18 @@ func (api *API) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slog.Info("successful event deletion", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/delete"), slog.String("uid", uidStr))
+}
+
+func (api *API) UpdateEvent(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (api *API) SendMessage(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (api *API) GetMessages(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {

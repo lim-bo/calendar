@@ -95,6 +95,11 @@ func (api *API) MountEndpoint() {
 		r.Get("/{uid}/day", api.GetEventsByDay)
 		r.Delete("/{uid}/delete", api.DeleteEvent)
 	})
+	api.r.Route("/chats", func(r chi.Router) {
+		r.Use(api.CORSMiddleware)
+		r.Post("/{eventID}", api.SendMessage)
+		r.Get("/{eventID}", api.GetMessages)
+	})
 }
 
 func (api *API) Run() error {

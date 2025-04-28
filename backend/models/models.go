@@ -29,28 +29,25 @@ var (
 	PriorityLow  = Priority(1)
 )
 
+type EventBase struct {
+	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Master      uuid.UUID          `json:"master" bson:"master"`
+	Name        string             `json:"name" bson:"name"`
+	Description string             `json:"desc" bson:"desc"`
+	Type        string             `json:"type" bson:"type"`
+	Prior       Priority           `json:"prior" bson:"prior"`
+	Start       time.Time          `json:"start" bson:"start"`
+	End         time.Time          `json:"end" bson:"end"`
+}
+
 type Event struct {
-	ID           primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Master       uuid.UUID          `json:"master" bson:"master"`
-	Name         string             `json:"name" bson:"name"`
-	Description  string             `json:"desc" bson:"desc"`
-	Type         string             `json:"type" bson:"type"`
-	Prior        Priority           `json:"prior" bson:"prior"`
-	Start        time.Time          `json:"start" bson:"start"`
-	End          time.Time          `json:"end" bson:"end"`
-	Participants []uuid.UUID        `json:"parts" bson:"parts"`
+	EventBase
+	Participants []uuid.UUID `json:"parts" bson:"parts"`
 }
 
 type EventWithMails struct {
-	ID           primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Master       uuid.UUID          `json:"master" bson:"master"`
-	Name         string             `json:"name" bson:"name"`
-	Description  string             `json:"desc" bson:"desc"`
-	Type         string             `json:"type" bson:"type"`
-	Prior        Priority           `json:"prior" bson:"prior"`
-	Start        time.Time          `json:"start" bson:"start"`
-	End          time.Time          `json:"end" bson:"end"`
-	Participants []string           `json:"parts" bson:"parts"`
+	EventBase
+	Participants []string `json:"parts" bson:"parts"`
 }
 
 type Chat struct {

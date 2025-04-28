@@ -36,14 +36,16 @@ func TestAddEvent(t *testing.T) {
 	timestamp := time.Now().Add(time.Hour * 24 * 31)
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
 	event := &models.Event{
-		Master:       uid,
-		Name:         "FOR UPDATE",
-		Description:  "тусняк висняк",
-		Type:         "TUSA",
-		Start:        timestamp,
-		End:          timestamp.Add(time.Hour * 24),
+		EventBase: models.EventBase{
+			Master:      uid,
+			Name:        "FOR UPDATE",
+			Description: "тусняк висняк",
+			Type:        "TUSA",
+			Start:       timestamp,
+			End:         timestamp.Add(time.Hour * 24),
+			Prior:       models.PriorityHigh,
+		},
 		Participants: []uuid.UUID{uid},
-		Prior:        models.PriorityHigh,
 	}
 	err := em.AddEvent(event)
 	if err != nil {
@@ -238,15 +240,17 @@ func TestUpdateEvent(t *testing.T) {
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
 	timestamp := time.Now().Add(time.Hour * 24 * 31)
 	event := &models.Event{
-		ID:           objID,
-		Master:       uid,
-		Name:         "FOR UPDATE",
-		Description:  "тусняк висняк",
-		Type:         "Чаепитие",
-		Start:        timestamp,
-		End:          timestamp.Add(time.Hour * 24),
+		EventBase: models.EventBase{
+			ID:          objID,
+			Master:      uid,
+			Name:        "FOR UPDATE",
+			Description: "тусняк висняк",
+			Type:        "Чаепитие",
+			Start:       timestamp,
+			End:         timestamp.Add(time.Hour * 24),
+			Prior:       models.PriorityHigh,
+		},
 		Participants: []uuid.UUID{uid},
-		Prior:        models.PriorityHigh,
 	}
 	err = em.UpdateEvent(event)
 	if err != nil {
