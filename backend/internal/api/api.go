@@ -39,6 +39,7 @@ type EventManagerI interface {
 	GetEvents(master uuid.UUID) ([]*models.Event, error)
 	GetEventsByMonth(master uuid.UUID, month time.Month) ([]*models.Event, error)
 	DeleteEvent(master uuid.UUID, id primitive.ObjectID) error
+	UpdateEvent(event *models.Event) error
 	GetEventsByWeek(master uuid.UUID) ([]*models.Event, error)
 	GetEventsByDay(master uuid.UUID, day time.Time) ([]*models.Event, error)
 
@@ -94,6 +95,7 @@ func (api *API) MountEndpoint() {
 		r.Get("/{uid}/week", api.GetEventsByWeek)
 		r.Get("/{uid}/day", api.GetEventsByDay)
 		r.Delete("/{uid}/delete", api.DeleteEvent)
+		r.Post("/update", api.UpdateEvent)
 	})
 	api.r.Route("/chats", func(r chi.Router) {
 		r.Use(api.CORSMiddleware)

@@ -368,7 +368,33 @@ func (api *API) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) UpdateEvent(w http.ResponseWriter, r *http.Request) {
-
+	var eventRequest models.EventWithMails
+	err := sonic.ConfigDefault.NewDecoder(r.Body).Decode(&eventRequest)
+	defer r.Body.Close()
+	if err != nil {
+		slog.Error("error unmarshalling json", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/update"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	var event models.Event
+	uids, err := api.um.GetUUIDS(eventRequest.Participants)
+	if err != nil {
+		slog.Error("getting uids error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/update"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	event.EventBase = eventRequest.EventBase
+	event.Participants = append(uids, eventRequest.Master)
+	err = api.em.UpdateEvent(&event)
+	if err != nil {
+		slog.Error("updating event error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/update"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	slog.Info("successfully updated event", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/update"))
 }
 
 func (api *API) SendMessage(w http.ResponseWriter, r *http.Request) {
