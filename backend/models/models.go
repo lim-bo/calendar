@@ -41,12 +41,12 @@ type EventBase struct {
 }
 
 type Event struct {
-	EventBase
+	EventBase    `json:",inline" bson:",inline"`
 	Participants []uuid.UUID `json:"parts" bson:"parts"`
 }
 
 type EventWithMails struct {
-	EventBase
+	EventBase    `json:",inline" bson:",inline"`
 	Participants []string `json:"parts" bson:"parts"`
 }
 
