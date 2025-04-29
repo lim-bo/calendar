@@ -241,7 +241,7 @@ func (api *API) GetEventsByMonth(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
 		return
 	}
-	err = sonic.ConfigFastest.NewEncoder(w).Encode(map[string]interface{}{"events": events, "cod": 200})
+	err = sonic.ConfigDefault.NewEncoder(w).Encode(map[string]interface{}{"events": events, "cod": 200})
 	if err != nil {
 		slog.Error("error marshalling events result", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/month"))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -273,7 +273,7 @@ func (api *API) GetEventsByWeek(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
 		return
 	}
-	err = sonic.ConfigFastest.NewEncoder(w).Encode(map[string]interface{}{"events": events, "cod": 200})
+	err = sonic.ConfigDefault.NewEncoder(w).Encode(map[string]interface{}{"events": events, "cod": 200})
 	if err != nil {
 		slog.Error("error marshalling events result", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/week"))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -313,7 +313,7 @@ func (api *API) GetEventsByDay(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
 		return
 	}
-	err = sonic.ConfigFastest.NewEncoder(w).Encode(map[string]interface{}{"events": events, "cod": 200})
+	err = sonic.ConfigDefault.NewEncoder(w).Encode(map[string]interface{}{"events": events, "cod": 200})
 	if err != nil {
 		slog.Error("error marshalling events result", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/day"))
 		w.WriteHeader(http.StatusInternalServerError)
