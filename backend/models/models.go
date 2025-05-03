@@ -52,10 +52,15 @@ type EventWithMails struct {
 
 type Chat struct {
 	EventID  primitive.ObjectID `json:"event_id" bson:""`
-	Messages []Message          `json:"messages" bson:"messages"`
+	Messages []MessageWithMail  `json:"messages" bson:"messages"`
 }
 
 type Message struct {
 	Sender  uuid.UUID `json:"sender" bson:"sender"`
 	Content string    `json:"cont" bson:"cont"`
+}
+
+type MessageWithMail struct {
+	Sender  string `json:"sender" bson:"sender"`
+	Content string `json"cont" bson:"cont"`
 }

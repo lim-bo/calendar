@@ -32,6 +32,7 @@ type UserManagerI interface {
 	ChangePassword(newPass string, uid uuid.UUID) error
 	GetProfileInfo(uid uuid.UUID) (*models.UserCredentialsRegister, error)
 	GetUUIDS(mails []string) ([]uuid.UUID, error)
+	GetEmails(uids []uuid.UUID) ([]string, error)
 }
 
 type EventManagerI interface {
@@ -45,7 +46,7 @@ type EventManagerI interface {
 
 	DeleteChat(eventID primitive.ObjectID) error
 	GetMessages(eventID primitive.ObjectID) (*models.Chat, error)
-	SendMessage(eventID primitive.ObjectID, msg *models.Message) error
+	SendMessage(eventID primitive.ObjectID, msg *models.MessageWithMail) error
 }
 
 type API struct {

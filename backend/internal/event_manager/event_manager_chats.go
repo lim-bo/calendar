@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (em *EventManager) SendMessage(eventID primitive.ObjectID, msg *models.Message) error {
+func (em *EventManager) SendMessage(eventID primitive.ObjectID, msg *models.MessageWithMail) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	_, err := em.cli.Database("calend_db").Collection("chats").UpdateOne(ctx, bson.M{

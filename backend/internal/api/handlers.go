@@ -421,7 +421,18 @@ func (api *API) SendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	err = api.em.SendMessage(eventIDPrim, &msg)
+
+	mails, err := api.um.GetEmails([]uuid.UUID{msg.Sender})
+	if err != nil {
+		slog.Error("error mapping uid to mail", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	err = api.em.SendMessage(eventIDPrim, &models.MessageWithMail{
+		Sender:  mails[0],
+		Content: msg.Content,
+	})
 	if err != nil {
 		slog.Error("error sending message", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"))
 		w.WriteHeader(http.StatusInternalServerError)
