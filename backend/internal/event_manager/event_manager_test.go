@@ -175,7 +175,7 @@ func TestSendMessage(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i := range 10 {
-		err = em.SendMessage(objID, models.Message{
+		err = em.SendMessage(objID, &models.Message{
 			Sender:  uuid.MustParse("38cb4038-4b23-4953-88b7-1e75fe688b79"),
 			Content: fmt.Sprintf("message No. %d", i),
 		})

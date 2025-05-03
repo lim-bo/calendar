@@ -398,7 +398,38 @@ func (api *API) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) SendMessage(w http.ResponseWriter, r *http.Request) {
-
+	eventID := r.PathValue("eventID")
+	if eventID == "" {
+		slog.Error("send message request with invalid eventid", slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	eventIDPrim, err := primitive.ObjectIDFromHex(eventID)
+	if err != nil {
+		slog.Error("send message request with invalid eventid", slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	var msg models.Message
+	err = sonic.ConfigDefault.NewDecoder(r.Body).Decode(&msg)
+	if err != nil {
+		slog.Error("error unmarshalling json", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	defer r.Body.Close()
+	err = api.em.SendMessage(eventIDPrim, &msg)
+	if err != nil {
+		slog.Error("error sending message", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	//TO-DO: send email notification
+	slog.Info("successfuly sended message to event chat", slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"), slog.String("event", eventID))
 }
 
 func (api *API) GetMessages(w http.ResponseWriter, r *http.Request) {

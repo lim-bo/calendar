@@ -45,7 +45,7 @@ type EventManagerI interface {
 
 	DeleteChat(eventID primitive.ObjectID) error
 	GetMessages(eventID primitive.ObjectID) (*models.Chat, error)
-	SendMessage(eventID primitive.ObjectID, msg models.Message) error
+	SendMessage(eventID primitive.ObjectID, msg *models.Message) error
 }
 
 type API struct {
