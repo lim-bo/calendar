@@ -157,3 +157,21 @@ func (um *UserManager) GetUUIDS(mails []string) ([]uuid.UUID, error) {
 	}
 	return result, nil
 }
+
+func (um *UserManager) GetEmails(uids []uuid.UUID) ([]string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	rows, err := um.pool.Query(ctx, `SELECT mail FROM profiles WHERE uid = ANY($1);`, uids)
+	if err != nil {
+		return nil, errors.New("error getting uids: " + err.Error())
+	}
+	result := make([]string, 0)
+	for rows.Next() {
+		var mail string
+		if err := rows.Scan(&mail); err != nil {
+			return nil, errors.New("error scanning values (uids): " + err.Error())
+		}
+		result = append(result, mail)
+	}
+	return result, nil
+}

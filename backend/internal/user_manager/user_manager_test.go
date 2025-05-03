@@ -3,6 +3,7 @@ package usermanager_test
 import (
 	"testing"
 
+	"github.com/google/uuid"
 	usermanager "github.com/lim-bo/calendar/backend/internal/user_manager"
 	"github.com/lim-bo/calendar/backend/internal/util"
 	"github.com/lim-bo/calendar/backend/models"
@@ -165,5 +166,23 @@ func TestGetUUIDS(t *testing.T) {
 	}
 	for _, u := range uids {
 		t.Log(u)
+	}
+}
+
+func TestGetMails(t *testing.T) {
+	cfg := usermanager.DBConfig{
+		Host:     viper.GetString("users_db_host"),
+		Port:     viper.GetString("users_db_port"),
+		DBName:   viper.GetString("users_db_name"),
+		User:     viper.GetString("users_db_user"),
+		Password: viper.GetString("users_db_pass"),
+	}
+	um := usermanager.New(cfg)
+	mails, err := um.GetEmails([]uuid.UUID{uuid.MustParse("32bc8c40-d423-4607-88b6-42248f8d256f")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, m := range mails {
+		t.Log(m)
 	}
 }
