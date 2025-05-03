@@ -51,7 +51,7 @@ type EventWithMails struct {
 }
 
 type Chat struct {
-	EventID  primitive.ObjectID `json:"event_id" bson:""`
+	EventID  primitive.ObjectID `json:"event_id" bson:"event_id"`
 	Messages []MessageWithMail  `json:"messages" bson:"messages"`
 }
 

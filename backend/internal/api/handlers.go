@@ -444,7 +444,35 @@ func (api *API) SendMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) GetMessages(w http.ResponseWriter, r *http.Request) {
-
+	eventID := r.PathValue("eventID")
+	if eventID == "" {
+		slog.Error("get messages request with invalid eventid", slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	eventIDPrim, err := primitive.ObjectIDFromHex(eventID)
+	if err != nil {
+		slog.Error("get messages request with invalid eventid", slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	chat, err := api.em.GetMessages(eventIDPrim)
+	if err != nil {
+		slog.Error("getting messages error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	err = sonic.ConfigDefault.NewEncoder(w).Encode(chat)
+	if err != nil {
+		slog.Error("error marshalling content", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrResponse)
+		return
+	}
+	slog.Info("successfuly provided messages", slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"), slog.String("event", eventID))
 }
 
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
