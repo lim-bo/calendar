@@ -62,5 +62,5 @@ type Message struct {
 
 type MessageWithMail struct {
 	Sender  string `json:"sender" bson:"sender"`
-	Content string `json"cont" bson:"cont"`
+	Content string `json:"cont" bson:"cont"`
 }
