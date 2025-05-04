@@ -37,7 +37,7 @@ services:
     image: minio/minio:latest
     container_name: calendar_minio_container
     ports:
-      - 9090:9090
+      - 9090:9000
       - 9091:9091
     volumes:
       - calend_minio_data:/data

@@ -64,3 +64,8 @@ type MessageWithMail struct {
 	Sender  string `json:"sender" bson:"sender"`
 	Content string `json:"cont" bson:"cont"`
 }
+
+type FileLoad struct {
+	Name string `json:"name"`
+	Data []byte `json:"data"`
+}
