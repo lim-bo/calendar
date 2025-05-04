@@ -11,3 +11,4 @@ CREATE TABLE "profiles" (
 );
 
 CREATE INDEX "profiles_uid_index" ON "profiles"("uid");
+
