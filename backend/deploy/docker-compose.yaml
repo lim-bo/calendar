@@ -33,9 +33,23 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
     networks:
       - servicenet
+  minio:
+    image: minio/minio:latest
+    container_name: calendar_minio_container
+    ports:
+      - 9090:9090
+      - 9091:9091
+    volumes:
+      - calend_minio_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASS}
+    restart: unless-stopped
+    command: server /data --console-address ":9091"
 volumes:
   calend_pgdata:
   calend_mongodata:
+  calend_minio_data:
 
 networks:
   servicenet:
