@@ -5,8 +5,10 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lim-bo/calendar/backend/models"
 	"github.com/minio/minio-go/v7"
@@ -100,4 +102,29 @@ func (am *AttachManager) LoadAttachment(eventID primitive.ObjectID, file *models
 		return errors.New("commiting error: " + err.Error())
 	}
 	return nil
+}
+
+func (am *AttachManager) GetAttachments(eventID primitive.ObjectID) ([]*models.FileDownload, error) {
+	rows, err := am.sqlcli.Query(context.Background(), `SELECT name FROM attachments WHERE event_id = $1;`, eventID.Hex())
+	if err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr == pgx.ErrNoRows {
+			return nil, errors.New("there is no event with such id")
+		}
+		return nil, errors.New("getting files' names error: " + err.Error())
+	}
+	result := make([]*models.FileDownload, 0)
+	for rows.Next() {
+		var file models.FileDownload
+		err = rows.Scan(&file.Name)
+		if err != nil {
+			return nil, errors.New("scanning value error: " + err.Error())
+		}
+		url, err := am.cli.PresignedGetObject(context.Background(), am.bucket, file.Name, time.Hour, nil)
+		if err != nil {
+			return nil, errors.New("getting url error: " + err.Error())
+		}
+		file.Link = url.String()
+		result = append(result, &file)
+	}
+	return result, nil
 }

@@ -69,3 +69,8 @@ type FileLoad struct {
 	Name string `json:"name"`
 	Data []byte `json:"data"`
 }
+
+type FileDownload struct {
+	Name string `json:"name"`
+	Link string `json:"link"`
+}

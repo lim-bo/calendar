@@ -6,8 +6,10 @@ require (
 	github.com/bytedance/sonic v1.13.2
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/google/uuid v1.6.0
+	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jackc/pgx/v4 v4.18.3
+	github.com/minio/minio-go/v7 v7.0.91
 	github.com/spf13/viper v1.20.1
 	go.mongodb.org/mongo-driver v1.17.3
 	golang.org/x/crypto v0.37.0
@@ -24,7 +26,6 @@ require (
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
-	github.com/jackc/pgconn v1.14.3 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.3.3 // indirect
@@ -35,7 +36,6 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/minio/crc64nvme v1.0.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
-	github.com/minio/minio-go/v7 v7.0.91 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
