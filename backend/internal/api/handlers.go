@@ -299,14 +299,14 @@ func (api *API) GetEventsByDay(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
 		return
 	}
-	day, err := strconv.Atoi(r.URL.Query().Get("day"))
-	if err != nil || day < 1 || day > 31 {
+	day, err := time.Parse("2006-01-02", r.URL.Query().Get("day"))
+	if err != nil {
 		slog.Error("invalid day query param", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/day"))
 		w.WriteHeader(http.StatusBadRequest)
 		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
 		return
 	}
-	events, err := api.em.GetEventsByDay(uid, time.Date(time.Now().Year(), time.Now().Month(), day, 0, 0, 0, 0, time.Now().Location()))
+	events, err := api.em.GetEventsByDay(uid, day)
 	if err != nil {
 		slog.Error("error getting events by day", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}/day"))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -473,6 +473,14 @@ func (api *API) GetMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slog.Info("successfuly provided messages", slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"), slog.String("event", eventID))
+}
+
+func (api *API) LoadAttachment(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (api *API) GetAttachments(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
