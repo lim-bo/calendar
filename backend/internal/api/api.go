@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	attachmanager "github.com/lim-bo/calendar/backend/internal/attachments_manager"
 	eventmanager "github.com/lim-bo/calendar/backend/internal/event_manager"
 	usermanager "github.com/lim-bo/calendar/backend/internal/user_manager"
 	"github.com/lim-bo/calendar/backend/internal/util"
@@ -49,10 +50,16 @@ type EventManagerI interface {
 	SendMessage(eventID primitive.ObjectID, msg *models.MessageWithMail) error
 }
 
+type AttachmentsManagerI interface {
+	LoadAttachment(eventID primitive.ObjectID, file *models.FileLoad) error
+	GetAttachments(eventID primitive.ObjectID) ([]*models.FileDownload, error)
+}
+
 type API struct {
 	r  *chi.Mux
 	um UserManagerI
 	em EventManagerI
+	am AttachmentsManagerI
 }
 
 func New() *API {
@@ -73,10 +80,24 @@ func New() *API {
 		User:     viper.GetString("events_db_user"),
 		Password: viper.GetString("events_db_pass"),
 	}
+	s3cfg := attachmanager.MinioCfg{
+		Address:    viper.GetString("minio_addr"),
+		User:       viper.GetString("minio_user"),
+		Pass:       viper.GetString("minio_pass"),
+		BucketName: viper.GetString("minio_bucket"),
+	}
+	sqlcfg := attachmanager.DBConfig{
+		Host:     viper.GetString("users_db_host"),
+		Port:     viper.GetString("users_db_port"),
+		DBName:   viper.GetString("users_db_name"),
+		User:     viper.GetString("users_db_user"),
+		Password: viper.GetString("users_db_pass"),
+	}
 	return &API{
 		r:  chi.NewMux(),
 		um: usermanager.New(usersDBcfg),
 		em: eventmanager.New(eventDBcfg),
+		am: attachmanager.New(&s3cfg, &sqlcfg),
 	}
 }
 
@@ -102,6 +123,11 @@ func (api *API) MountEndpoint() {
 		r.Use(api.CORSMiddleware)
 		r.Post("/{eventID}", api.SendMessage)
 		r.Get("/{eventID}", api.GetMessages)
+	})
+	api.r.Route("/attachs", func(r chi.Router) {
+		r.Use(api.CORSMiddleware)
+		r.Post("/{eventID}", api.LoadAttachment)
+		r.Get("/{eventID}", api.GetAttachments)
 	})
 }
 

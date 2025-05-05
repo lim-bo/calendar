@@ -476,7 +476,36 @@ func (api *API) GetMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) LoadAttachment(w http.ResponseWriter, r *http.Request) {
-
+	eventID := r.PathValue("eventID")
+	if eventID == "" {
+		slog.Error("load attachment request with invalid eventid", slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	eventIDPrim, err := primitive.ObjectIDFromHex(eventID)
+	if err != nil {
+		slog.Error("load attachment request with invalid eventid", slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	var file models.FileLoad
+	err = sonic.ConfigDefault.NewDecoder(r.Body).Decode(&file)
+	if err != nil {
+		slog.Error("error unmarshalling json", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	err = api.am.LoadAttachment(eventIDPrim, &file)
+	if err != nil {
+		slog.Error("loading attachment error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	slog.Info("successfuly loaded attachment", slog.String("event", eventID), slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
 }
 
 func (api *API) GetAttachments(w http.ResponseWriter, r *http.Request) {
