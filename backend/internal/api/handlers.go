@@ -509,7 +509,35 @@ func (api *API) LoadAttachment(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) GetAttachments(w http.ResponseWriter, r *http.Request) {
-
+	eventID := r.PathValue("eventID")
+	if eventID == "" {
+		slog.Error("download attachment request with invalid eventid", slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	eventIDPrim, err := primitive.ObjectIDFromHex(eventID)
+	if err != nil {
+		slog.Error("download attachment request with invalid eventid", slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	result, err := api.am.GetAttachments(eventIDPrim)
+	if err != nil {
+		slog.Error("getting attachments for event error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	err = sonic.ConfigDefault.NewEncoder(w).Encode(result)
+	if err != nil {
+		slog.Error("marshalling result error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrResponse)
+		return
+	}
+	slog.Info("successfuly provided attachments for event", slog.String("event", eventID), slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
 }
 
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
