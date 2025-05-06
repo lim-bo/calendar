@@ -46,10 +46,25 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_PASS}
     restart: unless-stopped
     command: server /data --console-address ":9091"
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: calendar_rabbit_container
+    hostname: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+    volumes:
+      - calend_rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    
 volumes:
   calend_pgdata:
   calend_mongodata:
   calend_minio_data:
+  calend_rabbitmq_data:
 
 networks:
   servicenet:
