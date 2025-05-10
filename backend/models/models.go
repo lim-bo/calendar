@@ -74,3 +74,9 @@ type FileDownload struct {
 	Name string `json:"name"`
 	Link string `json:"link"`
 }
+
+type Notification struct {
+	To      []string `json:"emails"`
+	Subject string   `json:"subject"`
+	Content string   `json:"content"`
+}
