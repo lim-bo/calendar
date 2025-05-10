@@ -257,3 +257,22 @@ func TestUpdateEvent(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetEventByID(t *testing.T) {
+	cfg := eventmanager.DBConfig{
+		Host:     viper.GetString("events_db_host"),
+		Port:     viper.GetString("events_db_port"),
+		User:     viper.GetString("events_db_user"),
+		Password: viper.GetString("events_db_pass"),
+	}
+	objID, err := primitive.ObjectIDFromHex("6814a8011117e998968fcc97")
+	if err != nil {
+		t.Fatal(err)
+	}
+	em := eventmanager.New(cfg)
+	event, err := em.GetEventByID(objID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(event)
+}

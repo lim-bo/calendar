@@ -439,7 +439,7 @@ func (api *API) SendMessage(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
 		return
 	}
-	//TO-DO: send email notification
+	go api.SendChatMessageNotification(mails, eventIDPrim)
 	slog.Info("successfuly sended message to event chat", slog.String("from", r.RemoteAddr), slog.String("endpoint", "chats/{eventID}"), slog.String("event", eventID))
 }
 

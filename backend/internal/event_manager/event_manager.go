@@ -184,3 +184,18 @@ func (em *EventManager) UpdateEvent(event *models.Event) error {
 	}
 	return nil
 }
+
+func (em *EventManager) GetEventByID(id primitive.ObjectID) (*models.Event, error) {
+	res := em.cli.Database("calend_db").Collection("events").FindOne(context.Background(), bson.M{
+		"_id": id,
+	})
+	if res.Err() != nil {
+		return nil, errors.New("error getting event by id: " + res.Err().Error())
+	}
+	var event models.Event
+	err := res.Decode(&event)
+	if err != nil {
+		return nil, errors.New("error unmarshalling eventByID results: " + err.Error())
+	}
+	return &event, nil
+}
