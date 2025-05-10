@@ -54,7 +54,7 @@ func New() *NotifyService {
 		Password: viper.GetString("rabbit_pass"),
 	}
 	c, cancel := rabbit.NewConsumer(mqcfg, "notifications")
-	closeChan := make(chan struct{})
+	closeChan := make(chan struct{}, 1)
 	inputChan := make(chan *models.Notification)
 	errorChan := make(chan error)
 	return &NotifyService{
