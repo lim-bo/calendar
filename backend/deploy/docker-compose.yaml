@@ -24,6 +24,7 @@ services:
     image: mongo:6.0
     container_name: calendar_mongo_container
     restart: unless-stopped
+    hostname: mongodb
     ports:
       - 27017:27017
     volumes:
@@ -35,6 +36,7 @@ services:
       - servicenet
   minio:
     image: minio/minio:latest
+    hostname: minio
     container_name: calendar_minio_container
     ports:
       - 9090:9000
@@ -46,6 +48,8 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_PASS}
     restart: unless-stopped
     command: server /data --console-address ":9091"
+    networks:
+      - servicenet
   rabbitmq:
     image: rabbitmq:3-management
     container_name: calendar_rabbit_container
@@ -59,7 +63,26 @@ services:
     volumes:
       - calend_rabbitmq_data:/var/lib/rabbitmq
     restart: unless-stopped
-    
+    networks:
+      - servicenet
+  api:
+    container_name: api_container
+    image: calend/api
+    restart: always
+    environment:
+      WAIT_HOSTS: postgres:5432, mongodb:27017, rabbitmq:5672
+    depends_on:
+      - rabbitmq
+      - minio
+      - mongodb
+      - postgres
+    build: 
+      context: ../
+      dockerfile: deploy/api/DockerFile
+    networks:
+      - servicenet
+    ports:
+      - 8080:8080
 volumes:
   calend_pgdata:
   calend_mongodata:
