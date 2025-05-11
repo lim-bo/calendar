@@ -51,7 +51,12 @@ func (api *API) Register(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrProccessingBody)
 		return
 	}
-	slog.Debug("creds", slog.Any("value", creds))
+	if !ValidateEmail(creds.Email) {
+		slog.Error("register request with invalid email", slog.String("from", r.RemoteAddr), slog.String("endpoint", "/users/register"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrInvalidEmail)
+		return
+	}
 	err = api.um.Register(&creds)
 	if err != nil {
 		if err == usermanager.ErrRegistered {

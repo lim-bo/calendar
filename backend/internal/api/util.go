@@ -3,11 +3,14 @@ package api
 import (
 	"log/slog"
 	"net/http"
+	"regexp"
 
 	"github.com/bytedance/sonic"
 	"github.com/google/uuid"
 	"github.com/lim-bo/calendar/backend/models"
 )
+
+var emailRegExp = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$`)
 
 type ErrorResponse struct {
 	Status    int    `json:"cod"`
@@ -39,4 +42,17 @@ func WriteGetProfileResponse(w http.ResponseWriter, info *models.UserCredentials
 	if err != nil {
 		slog.Error("sending profile info error", slog.String("error_value", err.Error()))
 	}
+}
+
+func ValidateEmail(email string) bool {
+	return emailRegExp.MatchString(email)
+}
+
+func ValidateEmailMult(emails []string) bool {
+	for _, e := range emails {
+		if !emailRegExp.MatchString(e) {
+			return false
+		}
+	}
+	return true
 }

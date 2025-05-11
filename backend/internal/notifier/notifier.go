@@ -126,6 +126,7 @@ func (ns *NotifyService) Run() error {
 		wg.Add(1)
 		go ns.notifyWorker(wg)
 	}
+	log.Println("notifications service started")
 	wg.Wait()
 	return nil
 }

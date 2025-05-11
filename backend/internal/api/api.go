@@ -29,6 +29,7 @@ var (
 	ErrRepository      = errors.New("error while fetching db")
 	ErrLogin           = errors.New("unregistered or wrong credentials")
 	ErrResponse        = errors.New("error while responsing")
+	ErrInvalidEmail    = errors.New("invalid email")
 )
 
 type UserManagerI interface {
