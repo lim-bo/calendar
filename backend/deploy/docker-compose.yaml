@@ -83,6 +83,19 @@ services:
       - servicenet
     ports:
       - 8080:8080
+  notifier:
+    container_name: notifier_container
+    image: calend/notifier
+    restart: always
+    environment:
+      WAIT_HOSTS: rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    build: 
+      context: ../
+      dockerfile: deploy/notifier/DockerFile
+    networks:
+      - servicenet
 volumes:
   calend_pgdata:
   calend_mongodata:
