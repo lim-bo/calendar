@@ -15,6 +15,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var cfg eventmanager.DBConfig
+
 func TestMain(m *testing.M) {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 	err := util.LoadConfig()
@@ -22,30 +24,30 @@ func TestMain(m *testing.M) {
 		log.Println(err)
 		return
 	}
-	m.Run()
-}
-
-func TestAddEvent(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
+	cfg = eventmanager.DBConfig{
+		Host:     "localhost",
 		Port:     viper.GetString("events_db_port"),
 		User:     viper.GetString("events_db_user"),
 		Password: viper.GetString("events_db_pass"),
 	}
+	m.Run()
+}
+
+func TestAddEvent(t *testing.T) {
 	em := eventmanager.New(cfg)
-	timestamp := time.Now().Add(time.Hour * 24 * 31)
+	timestamp := time.Now()
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
 	event := &models.Event{
 		EventBase: models.EventBase{
 			Master:      uid,
-			Name:        "FOR UPDATE",
+			Name:        "FOR NEW STRUCT",
 			Description: "тусняк висняк",
 			Type:        "TUSA",
 			Start:       timestamp,
 			End:         timestamp.Add(time.Hour * 24),
 			Prior:       models.PriorityHigh,
 		},
-		Participants: []uuid.UUID{uid},
+		Participants: []models.Participant{{UID: uid, Accepted: true}},
 	}
 	err := em.AddEvent(event)
 	if err != nil {
@@ -55,12 +57,6 @@ func TestAddEvent(t *testing.T) {
 }
 
 func TestGetEvents(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
-		Port:     viper.GetString("events_db_port"),
-		User:     viper.GetString("events_db_user"),
-		Password: viper.GetString("events_db_pass"),
-	}
 	em := eventmanager.New(cfg)
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
 	events, err := em.GetEvents(uid)
@@ -74,12 +70,6 @@ func TestGetEvents(t *testing.T) {
 }
 
 func TestDeleteEvent(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
-		Port:     viper.GetString("events_db_port"),
-		User:     viper.GetString("events_db_user"),
-		Password: viper.GetString("events_db_pass"),
-	}
 	em := eventmanager.New(cfg)
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
 	id, err := primitive.ObjectIDFromHex("67fd5a426b30852b941ef893")
@@ -93,15 +83,9 @@ func TestDeleteEvent(t *testing.T) {
 }
 
 func TestGetEventsByMonth(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
-		Port:     viper.GetString("events_db_port"),
-		User:     viper.GetString("events_db_user"),
-		Password: viper.GetString("events_db_pass"),
-	}
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
 	em := eventmanager.New(cfg)
-	events, err := em.GetEventsByMonth(uid, time.April)
+	events, err := em.GetEventsByMonth(uid, time.June)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,12 +100,6 @@ func TestGetEventsByMonth(t *testing.T) {
 }
 
 func TestGetEventsByWeek(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
-		Port:     viper.GetString("events_db_port"),
-		User:     viper.GetString("events_db_user"),
-		Password: viper.GetString("events_db_pass"),
-	}
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
 	em := eventmanager.New(cfg)
 	events, err := em.GetEventsByWeek(uid)
@@ -139,15 +117,9 @@ func TestGetEventsByWeek(t *testing.T) {
 }
 
 func TestGetEventsByDay(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
-		Port:     viper.GetString("events_db_port"),
-		User:     viper.GetString("events_db_user"),
-		Password: viper.GetString("events_db_pass"),
-	}
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
 	em := eventmanager.New(cfg)
-	day := time.Date(time.Now().Year(), time.Now().Month(), 21, 0, 0, 0, 0, time.Now().Location())
+	day := time.Now()
 	events, err := em.GetEventsByDay(uid, day)
 	if err != nil {
 		t.Fatal(err)
@@ -163,12 +135,6 @@ func TestGetEventsByDay(t *testing.T) {
 }
 
 func TestSendMessage(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
-		Port:     viper.GetString("events_db_port"),
-		User:     viper.GetString("events_db_user"),
-		Password: viper.GetString("events_db_pass"),
-	}
 	em := eventmanager.New(cfg)
 	objID, err := primitive.ObjectIDFromHex("680e312715e5c401ed91290a")
 	if err != nil {
@@ -187,12 +153,6 @@ func TestSendMessage(t *testing.T) {
 }
 
 func TestGetMessages(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
-		Port:     viper.GetString("events_db_port"),
-		User:     viper.GetString("events_db_user"),
-		Password: viper.GetString("events_db_pass"),
-	}
 	em := eventmanager.New(cfg)
 	objID, err := primitive.ObjectIDFromHex("680e312715e5c401ed91290a")
 	if err != nil {
@@ -208,12 +168,6 @@ func TestGetMessages(t *testing.T) {
 }
 
 func TestDeleteChat(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
-		Port:     viper.GetString("events_db_port"),
-		User:     viper.GetString("events_db_user"),
-		Password: viper.GetString("events_db_pass"),
-	}
 	em := eventmanager.New(cfg)
 	objID, err := primitive.ObjectIDFromHex("680e312715e5c401ed91290a")
 	if err != nil {
@@ -226,12 +180,6 @@ func TestDeleteChat(t *testing.T) {
 }
 
 func TestUpdateEvent(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
-		Port:     viper.GetString("events_db_port"),
-		User:     viper.GetString("events_db_user"),
-		Password: viper.GetString("events_db_pass"),
-	}
 	objID, err := primitive.ObjectIDFromHex("680fd43950d2b42f701061c0")
 	if err != nil {
 		t.Fatal(err)
@@ -250,7 +198,7 @@ func TestUpdateEvent(t *testing.T) {
 			End:         timestamp.Add(time.Hour * 24),
 			Prior:       models.PriorityHigh,
 		},
-		Participants: []uuid.UUID{uid},
+		Participants: []models.Participant{{UID: uid, Accepted: true}},
 	}
 	err = em.UpdateEvent(event)
 	if err != nil {
@@ -259,12 +207,6 @@ func TestUpdateEvent(t *testing.T) {
 }
 
 func TestGetEventByID(t *testing.T) {
-	cfg := eventmanager.DBConfig{
-		Host:     viper.GetString("events_db_host"),
-		Port:     viper.GetString("events_db_port"),
-		User:     viper.GetString("events_db_user"),
-		Password: viper.GetString("events_db_pass"),
-	}
 	objID, err := primitive.ObjectIDFromHex("6814a8011117e998968fcc97")
 	if err != nil {
 		t.Fatal(err)

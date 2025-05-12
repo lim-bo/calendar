@@ -40,9 +40,14 @@ type EventBase struct {
 	End         time.Time          `json:"end" bson:"end"`
 }
 
+type Participant struct {
+	Accepted bool      `json:"accepted,omitempty" bson:"accepted,omitempty"`
+	UID      uuid.UUID `json:"uid" bson:"uid"`
+}
+
 type Event struct {
 	EventBase    `json:",inline" bson:",inline"`
-	Participants []uuid.UUID `json:"parts" bson:"parts"`
+	Participants []Participant `json:"parts" bson:"parts"`
 }
 
 type EventWithMails struct {
