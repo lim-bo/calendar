@@ -392,6 +392,7 @@ func (api *API) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	event.EventBase = eventRequest.EventBase
 	event.Participants = append(uids, eventRequest.Master)
+	//TO-DO: add notification
 	err = api.em.UpdateEvent(&event)
 	if err != nil {
 		slog.Error("updating event error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/update"))
@@ -543,6 +544,16 @@ func (api *API) GetAttachments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slog.Info("successfuly provided attachments for event", slog.String("event", eventID), slog.String("from", r.RemoteAddr), slog.String("endpoint", "attachs/{eventID}"))
+}
+
+func (api *API) ChangeParticipantState(w http.ResponseWriter, r *http.Request) {
+	state := r.URL.Query().Get("state")
+	if state == "" {
+		slog.Error("state changing request with lack of query params", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/{uid}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
 }
 
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
