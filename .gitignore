@@ -4,3 +4,5 @@ backend/config
 backend/deploy/.env
 backend/bin
 backend/Makefile
+calend_desktop/build
+calend_desktop/*.pro*

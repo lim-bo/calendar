@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>message_entry</class>
+ <widget class="QWidget" name="message_entry">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>383</width>
+    <height>44</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">border: 2px solid #FFFFFF;
+border-radius: 5px;
+padding: 10px;
+</string>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="senderLabel">
+     <property name="styleSheet">
+      <string notr="true">border-color: rgb(255, 255, 0);
+border-width: 1px;
+border-radius: 5px;</string>
+     </property>
+     <property name="text">
+      <string>Sender</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLabel" name="contentLabel">
+     <property name="styleSheet">
+      <string notr="true">border-color: rgb(255, 255, 0);
+border-width: 1px;
+border-radius: 5px;</string>
+     </property>
+     <property name="text">
+      <string>Message Content</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
