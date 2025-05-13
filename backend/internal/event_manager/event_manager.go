@@ -199,3 +199,28 @@ func (em *EventManager) GetEventByID(id primitive.ObjectID) (*models.Event, erro
 	}
 	return &event, nil
 }
+
+func (em *EventManager) ChangeUserAcceptance(eventID primitive.ObjectID, uid uuid.UUID, accepted bool) error {
+	arrayFilters := options.ArrayFilters{
+		Filters: []interface{}{
+			bson.M{
+				"elem.uid": uid,
+			},
+		},
+	}
+	res, err := em.cli.Database("calend_db").Collection("events").UpdateOne(context.Background(), bson.M{
+		"_id":       eventID,
+		"parts.uid": uid,
+	}, bson.M{
+		"$set": bson.M{
+			"parts.$[elem].accepted": accepted,
+		},
+	}, options.Update().SetArrayFilters(arrayFilters))
+	if err != nil {
+		return errors.New("updating user state on event error: " + err.Error())
+	}
+	if res.MatchedCount == 0 {
+		return ErrNoSuchEvent
+	}
+	return nil
+}

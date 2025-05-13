@@ -218,3 +218,16 @@ func TestGetEventByID(t *testing.T) {
 	}
 	t.Log(event)
 }
+
+func TestChangeState(t *testing.T) {
+	objID, err := primitive.ObjectIDFromHex("68224dc92aeba3b92bcadf95")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
+	em := eventmanager.New(cfg)
+	err = em.ChangeUserAcceptance(objID, uid, false)
+	if err != nil {
+		t.Error(err)
+	}
+}

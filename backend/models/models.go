@@ -50,6 +50,14 @@ type Event struct {
 	Participants []Participant `json:"parts" bson:"parts"`
 }
 
+func (e *Event) ParticipantsUUIDS() []uuid.UUID {
+	result := make([]uuid.UUID, len(e.Participants))
+	for _, p := range e.Participants {
+		result = append(result, p.UID)
+	}
+	return result
+}
+
 type EventWithMails struct {
 	EventBase    `json:",inline" bson:",inline"`
 	Participants []string `json:"parts" bson:"parts"`
