@@ -143,7 +143,7 @@ func (um *UserManager) GetProfileInfo(uid uuid.UUID) (*models.UserCredentialsReg
 func (um *UserManager) GetUUIDS(mails []string) ([]uuid.UUID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
-	rows, err := um.pool.Query(ctx, `SELECT uid FROM profiles WHERE mail = ANY($1);`, mails)
+	rows, err := um.pool.Query(ctx, `SELECT uid FROM profiles WHERE mail = ANY($1) ORDER BY array_position($2, mail);`, mails, mails)
 	if err != nil {
 		return nil, errors.New("error getting uids: " + err.Error())
 	}
@@ -161,7 +161,7 @@ func (um *UserManager) GetUUIDS(mails []string) ([]uuid.UUID, error) {
 func (um *UserManager) GetEmails(uids []uuid.UUID) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
-	rows, err := um.pool.Query(ctx, `SELECT mail FROM profiles WHERE uid = ANY($1);`, uids)
+	rows, err := um.pool.Query(ctx, `SELECT mail FROM profiles WHERE uid = ANY($1) ORDER BY array_position($2, uid);`, uids, uids)
 	if err != nil {
 		return nil, errors.New("error getting uids: " + err.Error())
 	}

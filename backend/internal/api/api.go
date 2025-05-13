@@ -51,6 +51,7 @@ type EventManagerI interface {
 	GetEventsByWeek(master uuid.UUID) ([]*models.Event, error)
 	GetEventsByDay(master uuid.UUID, day time.Time) ([]*models.Event, error)
 	GetEventByID(id primitive.ObjectID) (*models.Event, error)
+	ChangeUserAcceptance(eventID primitive.ObjectID, uid uuid.UUID, accepted bool) error
 
 	DeleteChat(eventID primitive.ObjectID) error
 	GetMessages(eventID primitive.ObjectID) (*models.Chat, error)

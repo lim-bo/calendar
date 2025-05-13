@@ -205,8 +205,12 @@ func (api *API) AddEvent(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
 		return
 	}
+	var parts []models.Participant
+	for _, uid := range uids {
+		event.Participants = append(event.Participants, models.Participant{UID: uid, Accepted: false})
+	}
 	event.EventBase = eventRequest.EventBase
-	event.Participants = append(uids, eventRequest.Master)
+	event.Participants = append(parts, models.Participant{UID: eventRequest.Master, Accepted: false})
 	err = api.em.AddEvent(&event)
 	if err != nil {
 		slog.Error("event insertion error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"))
@@ -390,8 +394,12 @@ func (api *API) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
 		return
 	}
+	var parts []models.Participant
+	for i, uid := range uids {
+		event.Participants = append(event.Participants, models.Participant{UID: uid, Accepted: event.Participants[i].Accepted})
+	}
 	event.EventBase = eventRequest.EventBase
-	event.Participants = append(uids, eventRequest.Master)
+	event.Participants = append(parts, models.Participant{UID: eventRequest.Master, Accepted: false})
 	//TO-DO: add notification
 	err = api.em.UpdateEvent(&event)
 	if err != nil {
@@ -547,6 +555,20 @@ func (api *API) GetAttachments(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) ChangeParticipantState(w http.ResponseWriter, r *http.Request) {
+	eventID, err := primitive.ObjectIDFromHex(r.PathValue("eventID"))
+	if err != nil {
+		slog.Error("state changing request with invalid eventID in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/{uid}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	uid, err := uuid.Parse(r.PathValue("uid"))
+	if err != nil {
+		slog.Error("state changing request with invalid uid in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/{uid}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
 	state := r.URL.Query().Get("state")
 	if state == "" {
 		slog.Error("state changing request with lack of query params", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/{uid}"))
@@ -554,6 +576,30 @@ func (api *API) ChangeParticipantState(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
 		return
 	}
+	var acceptance bool
+	switch state {
+	case "1":
+		acceptance = true
+	case "0":
+		acceptance = false
+	default:
+		slog.Error("state changing request with invalid query param", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/{uid}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	err = api.em.ChangeUserAcceptance(eventID, uid, acceptance)
+	if err != nil {
+		slog.Error("error changing user state", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/{uid}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	slog.Info("successfully changed state", slog.String("from", r.RemoteAddr),
+		slog.String("endpoint", "events/{eventID}/{uid}"),
+		slog.String("uid", uid.String()),
+		slog.String("eventID", eventID.Hex()),
+	)
 }
 
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
