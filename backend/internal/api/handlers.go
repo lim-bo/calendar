@@ -602,6 +602,52 @@ func (api *API) ChangeParticipantState(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
+func (api *API) GetEventParticipants(w http.ResponseWriter, r *http.Request) {
+	eventID, err := primitive.ObjectIDFromHex(r.PathValue("eventID"))
+	if err != nil {
+		slog.Error("state changing request with invalid eventID in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/parts"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	partsWithUUIDS, err := api.em.GetPartsList(eventID)
+	if err != nil {
+		slog.Error("getting participants error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/parts"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	var uuids []uuid.UUID
+	for _, p := range partsWithUUIDS {
+		uuids = append(uuids, p.UID)
+	}
+	var partsWithEmails []models.ParticipantWithEmail
+	emails, err := api.um.GetEmails(uuids)
+	if err != nil {
+		slog.Error("mapping emails error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/parts"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	for i, p := range partsWithUUIDS {
+		partsWithEmails = append(partsWithEmails, models.ParticipantWithEmail{
+			Accepted: p.Accepted,
+			Email:    emails[i],
+		})
+	}
+	err = sonic.ConfigDefault.NewEncoder(w).Encode(map[string]interface{}{
+		"cod":   200,
+		"parts": partsWithEmails,
+	})
+	if err != nil {
+		slog.Error("marshalling results error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/parts"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	slog.Info("successfully provided participants list", slog.String("event", eventID.Hex()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/parts"))
+}
+
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

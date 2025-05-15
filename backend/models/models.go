@@ -45,6 +45,11 @@ type Participant struct {
 	UID      uuid.UUID `json:"uid" bson:"uid"`
 }
 
+type ParticipantWithEmail struct {
+	Accepted bool   `json:"accepted"`
+	Email    string `json:"email"`
+}
+
 type Event struct {
 	EventBase    `json:",inline" bson:",inline"`
 	Participants []Participant `json:"parts" bson:"parts"`

@@ -52,6 +52,7 @@ type EventManagerI interface {
 	GetEventsByDay(master uuid.UUID, day time.Time) ([]*models.Event, error)
 	GetEventByID(id primitive.ObjectID) (*models.Event, error)
 	ChangeUserAcceptance(eventID primitive.ObjectID, uid uuid.UUID, accepted bool) error
+	GetPartsList(eventID primitive.ObjectID) ([]models.Participant, error)
 
 	DeleteChat(eventID primitive.ObjectID) error
 	GetMessages(eventID primitive.ObjectID) (*models.Chat, error)
@@ -151,6 +152,7 @@ func (api *API) MountEndpoint() {
 		r.Delete("/{uid}/delete", api.DeleteEvent)
 		r.Post("/update", api.UpdateEvent)
 		r.Post("/{eventID}/{uid}", api.ChangeParticipantState)
+		r.Get("/{eventID}/parts", api.GetEventParticipants)
 	})
 	api.r.Route("/chats", func(r chi.Router) {
 		r.Use(api.CORSMiddleware)
