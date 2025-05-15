@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
@@ -223,4 +224,24 @@ func (em *EventManager) ChangeUserAcceptance(eventID primitive.ObjectID, uid uui
 		return ErrNoSuchEvent
 	}
 	return nil
+}
+
+func (em *EventManager) GetPartsList(eventID primitive.ObjectID) ([]models.Participant, error) {
+	cursor := em.cli.Database("calend_db").Collection("events").FindOne(context.Background(), bson.M{
+		"_id": eventID,
+	}, options.FindOne().SetProjection(bson.M{"parts": 1, "_id": 0}))
+	if cursor.Err() != nil {
+		return nil, errors.New("error getting event's participants: " + cursor.Err().Error())
+	}
+	raw, _ := cursor.Raw()
+	slog.Debug("content", slog.String("values", raw.String()))
+	var result struct {
+		Parts []models.Participant `bson:"parts"`
+	}
+	err := cursor.Decode(&result)
+	if err != nil {
+		return nil, errors.New("error unmarshalling result: " + err.Error())
+	}
+	slog.Debug("result", slog.Any("values", result.Parts))
+	return result.Parts, nil
 }

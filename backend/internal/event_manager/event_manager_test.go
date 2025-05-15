@@ -231,3 +231,18 @@ func TestChangeState(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestListParticipants(t *testing.T) {
+	em := eventmanager.New(cfg)
+	objID, err := primitive.ObjectIDFromHex("68224dc92aeba3b92bcadf95")
+	if err != nil {
+		t.Fatal(err)
+	}
+	parts, err := em.GetPartsList(objID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range parts {
+		t.Log(p.UID, p.Accepted)
+	}
+}
