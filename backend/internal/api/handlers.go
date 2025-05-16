@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -198,7 +197,6 @@ func (api *API) AddEvent(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
 		return
 	}
-	fmt.Println(eventRequest.Participants)
 	var event models.Event
 	uids, err := api.um.GetUUIDS(eventRequest.Participants)
 	if err != nil {
@@ -207,14 +205,12 @@ func (api *API) AddEvent(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
 		return
 	}
-	fmt.Println(uids)
 	var parts []models.Participant
 	for _, uid := range uids {
 		parts = append(parts, models.Participant{UID: uid, Accepted: false})
 	}
 	event.EventBase = eventRequest.EventBase
 	event.Participants = parts
-	fmt.Println(event.Participants)
 	err = api.em.AddEvent(&event)
 	if err != nil {
 		slog.Error("event insertion error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"))
