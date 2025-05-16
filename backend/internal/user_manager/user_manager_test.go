@@ -10,15 +10,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-func TestRegister(t *testing.T) {
+var cfg usermanager.DBConfig
 
-	cfg := usermanager.DBConfig{
-		Host:     viper.GetString("users_db_host"),
-		Port:     viper.GetString("users_db_port"),
-		DBName:   viper.GetString("users_db_name"),
-		User:     viper.GetString("users_db_user"),
-		Password: viper.GetString("users_db_pass"),
-	}
+func TestRegister(t *testing.T) {
 	um := usermanager.New(cfg)
 	testCreds := &models.UserCredentialsRegister{
 		UserCredentials: models.UserCredentials{
@@ -42,13 +36,6 @@ func TestRegister(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	cfg := usermanager.DBConfig{
-		Host:     viper.GetString("users_db_host"),
-		Port:     viper.GetString("users_db_port"),
-		DBName:   viper.GetString("users_db_name"),
-		User:     viper.GetString("users_db_user"),
-		Password: viper.GetString("users_db_pass"),
-	}
 	um := usermanager.New(cfg)
 	testCreds := &models.UserCredentials{
 		Email: "testmail@gmail.com",
@@ -71,14 +58,6 @@ func TestLogin(t *testing.T) {
 }
 
 func TestLoginAndUpdate(t *testing.T) {
-	cfg := usermanager.DBConfig{
-		Host:     viper.GetString("users_db_host"),
-		Port:     viper.GetString("users_db_port"),
-		DBName:   viper.GetString("users_db_name"),
-		User:     viper.GetString("users_db_user"),
-		Password: viper.GetString("users_db_pass"),
-	}
-
 	um := usermanager.New(cfg)
 	uid, err := um.Login(&models.UserCredentials{
 		Email: "testmail@gmail.com",
@@ -101,13 +80,6 @@ func TestLoginAndUpdate(t *testing.T) {
 }
 
 func TestLoginAndChangePassword(t *testing.T) {
-	cfg := usermanager.DBConfig{
-		Host:     viper.GetString("users_db_host"),
-		Port:     viper.GetString("users_db_port"),
-		DBName:   viper.GetString("users_db_name"),
-		User:     viper.GetString("users_db_user"),
-		Password: viper.GetString("users_db_pass"),
-	}
 	um := usermanager.New(cfg)
 	uid, err := um.Login(&models.UserCredentials{
 		Email: "testmail@gmail.com",
@@ -125,17 +97,17 @@ func TestLoginAndChangePassword(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	util.LoadConfig()
-	m.Run()
-}
-
-func TestLoginAndGetProfile(t *testing.T) {
-	cfg := usermanager.DBConfig{
-		Host:     viper.GetString("users_db_host"),
-		Port:     viper.GetString("users_db_port"),
+	cfg = usermanager.DBConfig{
+		Host:     "localhost",
+		Port:     "5435",
 		DBName:   viper.GetString("users_db_name"),
 		User:     viper.GetString("users_db_user"),
 		Password: viper.GetString("users_db_pass"),
 	}
+	m.Run()
+}
+
+func TestLoginAndGetProfile(t *testing.T) {
 	um := usermanager.New(cfg)
 	uid, err := um.Login(&models.UserCredentials{
 		Email: "testmail@gmail.com",
@@ -152,13 +124,6 @@ func TestLoginAndGetProfile(t *testing.T) {
 }
 
 func TestGetUUIDS(t *testing.T) {
-	cfg := usermanager.DBConfig{
-		Host:     viper.GetString("users_db_host"),
-		Port:     viper.GetString("users_db_port"),
-		DBName:   viper.GetString("users_db_name"),
-		User:     viper.GetString("users_db_user"),
-		Password: viper.GetString("users_db_pass"),
-	}
 	um := usermanager.New(cfg)
 	uids, err := um.GetUUIDS([]string{"aaa", "mar@mail.ru"})
 	if err != nil {
@@ -170,13 +135,6 @@ func TestGetUUIDS(t *testing.T) {
 }
 
 func TestGetMails(t *testing.T) {
-	cfg := usermanager.DBConfig{
-		Host:     viper.GetString("users_db_host"),
-		Port:     viper.GetString("users_db_port"),
-		DBName:   viper.GetString("users_db_name"),
-		User:     viper.GetString("users_db_user"),
-		Password: viper.GetString("users_db_pass"),
-	}
 	um := usermanager.New(cfg)
 	mails, err := um.GetEmails([]uuid.UUID{uuid.MustParse("32bc8c40-d423-4607-88b6-42248f8d256f")})
 	if err != nil {
