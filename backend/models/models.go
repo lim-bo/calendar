@@ -94,7 +94,9 @@ type FileDownload struct {
 }
 
 type Notification struct {
-	To      []string `json:"emails"`
-	Subject string   `json:"subject"`
-	Content string   `json:"content"`
+	Delayed  bool      `json:"delayed,omitempty"`
+	Deadline time.Time `json:"deadline,omitempty"`
+	To       []string  `json:"emails"`
+	Subject  string    `json:"subject"`
+	Content  string    `json:"content"`
 }

@@ -400,7 +400,6 @@ func (api *API) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	event.EventBase = eventRequest.EventBase
 	event.Participants = append(parts, models.Participant{UID: eventRequest.Master, Accepted: false})
-	//TO-DO: add notification
 	err = api.em.UpdateEvent(&event)
 	if err != nil {
 		slog.Error("updating event error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/update"))
@@ -408,6 +407,7 @@ func (api *API) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
 		return
 	}
+	go api.SendUpdateNotification(eventRequest.Participants, event.ID)
 	slog.Info("successfully updated event", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/update"))
 }
 
@@ -680,6 +680,32 @@ func (api *API) GetEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slog.Info("successfuly provided sorted events list", slog.String("uid", uid.String()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}"))
+}
+
+func (api *API) SetNotification(w http.ResponseWriter, r *http.Request) {
+	eventID, err := primitive.ObjectIDFromHex(r.PathValue("eventID"))
+	if err != nil {
+		slog.Error("set notification request with invalid eventID in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/notify"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	deadlineString := r.URL.Query().Get("deadline")
+	deadline, err := time.Parse("2006-01-02_15:04:05", deadlineString)
+	if err != nil {
+		slog.Error("set notification request with invalid deadline in query", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/notify"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	err = api.SendDelayedEventStartNotification(eventID, deadline)
+	if err != nil {
+		slog.Error("setting notification error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/notify"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrProducer)
+		return
+	}
+	slog.Info("successfuly set notification", slog.String("event", eventID.Hex()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/notify"))
 }
 
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {

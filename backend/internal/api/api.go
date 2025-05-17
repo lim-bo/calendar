@@ -4,13 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/bytedance/sonic"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	attachmanager "github.com/lim-bo/calendar/backend/internal/attachments_manager"
@@ -30,6 +28,7 @@ var (
 	ErrLogin           = errors.New("unregistered or wrong credentials")
 	ErrResponse        = errors.New("error while responsing")
 	ErrInvalidEmail    = errors.New("invalid email")
+	ErrProducer        = errors.New("error while producing message to queue")
 )
 
 type UserManagerI interface {
@@ -154,6 +153,7 @@ func (api *API) MountEndpoint() {
 		r.Post("/{eventID}/{uid}", api.ChangeParticipantState)
 		r.Get("/{eventID}/parts", api.GetEventParticipants)
 		r.Get("/{uid}", api.GetEvents)
+		r.Post("/{eventID}/notify", api.SetNotification)
 	})
 	api.r.Route("/chats", func(r chi.Router) {
 		r.Use(api.CORSMiddleware)
@@ -172,27 +172,4 @@ func (api *API) Run() error {
 	host, port := viper.GetString("api_host"), viper.GetString("api_port")
 	fmt.Printf("server started at %s:%s\n", host, port)
 	return http.ListenAndServe(host+":"+port, api.r)
-}
-
-func (api *API) SendChatMessageNotification(mails []string, eventID primitive.ObjectID) {
-	event, err := api.em.GetEventByID(eventID)
-	if err != nil {
-		slog.Error("fetching event db error", slog.String("error_desc", err.Error()))
-		return
-	}
-	var msg models.Notification
-	msg.To = mails
-	msg.Subject = "В чате события новое сообщение"
-	msg.Content = fmt.Sprintf("Пользователь, в чате события \"%s\" новое сообщение.\nПроверьте, вдруг это важно))", event.Name)
-	raw, err := sonic.Marshal(msg)
-	if err != nil {
-		slog.Error("error marshalling notification message", slog.String("error_desc", err.Error()))
-		return
-	}
-	err = api.p.ProduceWithJSON(raw)
-	if err != nil {
-		slog.Error("error sending notification message", slog.String("error_desc", err.Error()))
-		return
-	}
-	slog.Info("successfuly sended new message notification", slog.Any("to", mails), slog.String("eventID", string(eventID.Hex())))
 }
