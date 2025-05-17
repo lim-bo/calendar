@@ -44,7 +44,7 @@ type UserManagerI interface {
 
 type EventManagerI interface {
 	AddEvent(event *models.Event) error
-	GetEvents(master uuid.UUID) ([]*models.Event, error)
+	GetEvents(master uuid.UUID, flags map[string]bool) ([]*models.Event, error)
 	GetEventsByMonth(master uuid.UUID, month time.Month) ([]*models.Event, error)
 	DeleteEvent(master uuid.UUID, id primitive.ObjectID) error
 	UpdateEvent(event *models.Event) error
@@ -153,6 +153,7 @@ func (api *API) MountEndpoint() {
 		r.Post("/update", api.UpdateEvent)
 		r.Post("/{eventID}/{uid}", api.ChangeParticipantState)
 		r.Get("/{eventID}/parts", api.GetEventParticipants)
+		r.Get("/{uid}", api.GetEvents)
 	})
 	api.r.Route("/chats", func(r chi.Router) {
 		r.Use(api.CORSMiddleware)

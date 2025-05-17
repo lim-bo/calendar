@@ -648,6 +648,40 @@ func (api *API) GetEventParticipants(w http.ResponseWriter, r *http.Request) {
 	slog.Info("successfully provided participants list", slog.String("event", eventID.Hex()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/parts"))
 }
 
+func (api *API) GetEvents(w http.ResponseWriter, r *http.Request) {
+	uid, err := uuid.Parse(r.PathValue("uid"))
+	if err != nil {
+		slog.Error("get events request with invalid uid in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{uid}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	opts := make(map[string]bool, 0)
+	acceptedFilter := r.URL.Query().Get("accepted")
+	if acceptedFilter == "true" {
+		opts["accepted"] = true
+	}
+	masterFilter := r.URL.Query().Get("master")
+	if masterFilter == "true" {
+		opts["master"] = true
+	}
+	result, err := api.em.GetEvents(uid, opts)
+	if err != nil {
+		slog.Error("error getting events", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{uid}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	err = sonic.ConfigDefault.NewEncoder(w).Encode(map[string]interface{}{"events": result, "cod": 200})
+	if err != nil {
+		slog.Error("error marshalling events result", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrResponse)
+		return
+	}
+	slog.Info("successfuly provided sorted events list", slog.String("uid", uid.String()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "/events/{uid}"))
+}
+
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

@@ -22,11 +22,10 @@ var (
 )
 
 type AttachManager struct {
-	cli     *minio.Client
-	bucket  string
-	host    string
-	extHost string
-	sqlcli  *pgxpool.Pool
+	cli    *minio.Client
+	bucket string
+	host   string
+	sqlcli *pgxpool.Pool
 }
 
 type MinioCfg struct {
@@ -34,7 +33,6 @@ type MinioCfg struct {
 	User       string
 	Pass       string
 	BucketName string
-	ExtAddress string
 }
 
 type DBConfig struct {
@@ -66,11 +64,10 @@ func New(cfg *MinioCfg, sqlcfg *DBConfig) *AttachManager {
 		log.Fatal(err)
 	}
 	return &AttachManager{
-		cli:     client,
-		bucket:  cfg.BucketName,
-		sqlcli:  p,
-		extHost: cfg.ExtAddress,
-		host:    cfg.Address,
+		cli:    client,
+		bucket: cfg.BucketName,
+		sqlcli: p,
+		host:   cfg.Address,
 	}
 }
 

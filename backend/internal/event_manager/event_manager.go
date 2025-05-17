@@ -135,7 +135,7 @@ func (em *EventManager) GetEventsByDay(master uuid.UUID, day time.Time) ([]*mode
 	return result, nil
 }
 
-func (em *EventManager) GetEvents(master uuid.UUID) ([]*models.Event, error) {
+func (em *EventManager) GetEvents(master uuid.UUID, opts map[string]bool) ([]*models.Event, error) {
 	cursor, err := em.cli.Database("calend_db").Collection("events").Find(context.Background(), bson.M{"parts.uid": master})
 	if err != nil {
 		return nil, errors.New("searching docs error: " + err.Error())

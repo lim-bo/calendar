@@ -59,7 +59,7 @@ func TestAddEvent(t *testing.T) {
 func TestGetEvents(t *testing.T) {
 	em := eventmanager.New(cfg)
 	uid := uuid.MustParse("c882bd5c-e2fb-4ca7-b291-6d751addf2d9")
-	events, err := em.GetEvents(uid)
+	events, err := em.GetEvents(uid, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
