@@ -51,7 +51,7 @@ services:
     networks:
       - servicenet
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.12-management
     container_name: calendar_rabbit_container
     hostname: rabbitmq
     ports:
@@ -65,6 +65,17 @@ services:
     restart: unless-stopped
     networks:
       - servicenet
+    command:
+      - bash
+      - -c
+      - |
+        apt-get update && \
+        apt-get install -y curl && \
+        rabbitmq-plugins enable rabbitmq_management --offline && \
+        curl -L https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v3.12.0/rabbitmq_delayed_message_exchange-3.12.0.ez \
+          -o /plugins/rabbitmq_delayed_message_exchange-3.12.0.ez && \
+        rabbitmq-plugins enable --offline rabbitmq_delayed_message_exchange && \
+        rabbitmq-server
   api:
     container_name: api_container
     image: calend/api
