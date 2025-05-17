@@ -93,6 +93,6 @@ func TestGetAttachments(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, f := range files {
-		t.Logf("filename: %s link: %s", f.Name, f.Link)
+		t.Logf("filename: %s link: %s", f.Name, string(f.Data))
 	}
 }

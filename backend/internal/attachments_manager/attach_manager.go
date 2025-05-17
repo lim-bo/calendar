@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"log"
-	"time"
+	"log/slog"
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
@@ -21,9 +22,11 @@ var (
 )
 
 type AttachManager struct {
-	cli    *minio.Client
-	bucket string
-	sqlcli *pgxpool.Pool
+	cli     *minio.Client
+	bucket  string
+	host    string
+	extHost string
+	sqlcli  *pgxpool.Pool
 }
 
 type MinioCfg struct {
@@ -31,6 +34,7 @@ type MinioCfg struct {
 	User       string
 	Pass       string
 	BucketName string
+	ExtAddress string
 }
 
 type DBConfig struct {
@@ -62,9 +66,11 @@ func New(cfg *MinioCfg, sqlcfg *DBConfig) *AttachManager {
 		log.Fatal(err)
 	}
 	return &AttachManager{
-		cli:    client,
-		bucket: cfg.BucketName,
-		sqlcli: p,
+		cli:     client,
+		bucket:  cfg.BucketName,
+		sqlcli:  p,
+		extHost: cfg.ExtAddress,
+		host:    cfg.Address,
 	}
 }
 
@@ -119,12 +125,18 @@ func (am *AttachManager) GetAttachments(eventID primitive.ObjectID) ([]*models.F
 		if err != nil {
 			return nil, errors.New("scanning value error: " + err.Error())
 		}
-		url, err := am.cli.PresignedGetObject(context.Background(), am.bucket, file.Name, time.Hour, nil)
+		obj, err := am.cli.GetObject(context.Background(), am.bucket, file.Name, minio.GetObjectOptions{})
 		if err != nil {
-			return nil, errors.New("getting url error: " + err.Error())
+			return nil, errors.New("error getting object: " + err.Error())
 		}
-		file.Link = url.String()
+		raw, err := io.ReadAll(obj)
+		if err != nil {
+			return nil, errors.New("error reading object data: " + err.Error())
+		}
+		file.Data = raw
+		slog.Debug("file", slog.String("content", string(file.Data)))
 		result = append(result, &file)
+		obj.Close()
 	}
 	return result, nil
 }

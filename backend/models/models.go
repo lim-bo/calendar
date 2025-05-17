@@ -90,7 +90,7 @@ type FileLoad struct {
 
 type FileDownload struct {
 	Name string `json:"name"`
-	Link string `json:"link"`
+	Data []byte `json:"data"`
 }
 
 type Notification struct {
