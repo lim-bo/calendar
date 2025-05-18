@@ -206,14 +206,14 @@ func (api *API) AddEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var parts []models.Participant
+	parts = append(parts, models.Participant{
+		UID:      eventRequest.Master,
+		Accepted: false,
+	})
 	for _, uid := range uids {
 		parts = append(parts, models.Participant{UID: uid, Accepted: false})
 	}
 	event.EventBase = eventRequest.EventBase
-	event.Participants = append(event.Participants, models.Participant{
-		UID:      eventRequest.Master,
-		Accepted: false,
-	})
 	event.Participants = parts
 	err = api.em.AddEvent(&event)
 	if err != nil {
