@@ -17,13 +17,13 @@
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>130</y>
+     <y>100</y>
      <width>181</width>
      <height>271</height>
     </rect>
    </property>
    <property name="title">
-    <string>Создать событие</string>
+    <string>Cобытие</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -37,7 +37,7 @@
      <widget class="QDateEdit" name="startDateEdit">
       <property name="dateTime">
        <datetime>
-        <hour>15</hour>
+        <hour>3</hour>
         <minute>0</minute>
         <second>0</second>
         <year>2024</year>
@@ -47,7 +47,7 @@
       </property>
       <property name="maximumDateTime">
        <datetime>
-        <hour>14</hour>
+        <hour>2</hour>
         <minute>0</minute>
         <second>59</second>
         <year>2100</year>
@@ -92,7 +92,7 @@
      <widget class="QTimeEdit" name="endTimeEdit">
       <property name="maximumDateTime">
        <datetime>
-        <hour>18</hour>
+        <hour>6</hour>
         <minute>59</minute>
         <second>59</second>
         <year>2000</year>
@@ -121,14 +121,14 @@
     </rect>
    </property>
    <property name="text">
-    <string>Создать</string>
+    <string>Готово</string>
    </property>
   </widget>
   <widget class="QGroupBox" name="groupBox_2">
    <property name="geometry">
     <rect>
-     <x>310</x>
-     <y>140</y>
+     <x>300</x>
+     <y>100</y>
      <width>381</width>
      <height>381</height>
     </rect>
@@ -229,8 +229,8 @@
   <widget class="QLabel" name="result">
    <property name="geometry">
     <rect>
-     <x>272</x>
-     <y>540</y>
+     <x>262</x>
+     <y>500</y>
      <width>211</width>
      <height>20</height>
     </rect>
@@ -238,6 +238,50 @@
    <property name="text">
     <string/>
    </property>
+  </widget>
+  <widget class="QGroupBox" name="notificationGroup">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>400</y>
+     <width>181</width>
+     <height>79</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Уведомление о событии</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <item>
+     <widget class="QComboBox" name="notificationCombo">
+      <item>
+       <property name="text">
+        <string>Не отправлять</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>За 15 минут</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>За 1 час</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>За 1 день</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>За 1 неделю</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

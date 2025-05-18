@@ -71,6 +71,7 @@ void cal_7::loadEventsForWeek()
             for (const EventData& event : events) {
                 event_entry* entry = new event_entry(event, uid);
                 connect(entry, &event_entry::deleted, this, &cal_7::eventDeleted);
+                connect(entry, &event_entry::edited, this, &cal_7::eventEdited);
                 layout->addWidget(entry);
             }
         }
@@ -80,5 +81,10 @@ void cal_7::loadEventsForWeek()
 }
 void cal_7::showEvent(QShowEvent *event) {
     QWidget::showEvent(event);
+    loadEventsForWeek();
+}
+void cal_7::eventEdited(event_entry* ev)
+{
+
     loadEventsForWeek();
 }

@@ -9,6 +9,7 @@
 #include "eventData.h"
 #include "cal_1.h"
 #include "cal_7.h"
+#include "eventsforme.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -32,6 +33,8 @@ private slots:
     void on_mycal_clicked();
 
     void on_Event_push_clicked();
+
+    void on_my_events_clicked();
 
 private:
     Ui::MainWindow *ui;

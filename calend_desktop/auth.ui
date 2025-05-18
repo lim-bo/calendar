@@ -41,7 +41,7 @@
        <widget class="QLineEdit" name="pass_edit"/>
       </item>
       <item row="3" column="0" colspan="2">
-       <widget class="QGroupBox" name="dura_box">
+       <widget class="QGroupBox" name="box">
         <property name="enabled">
          <bool>false</bool>
         </property>

@@ -8,6 +8,7 @@ Cal_30::Cal_30(QString uid, QWidget *parent)
     ui->setupUi(this);
 
     ui->events_scroll->setWidgetResizable(true);
+    on_calendarWidget_clicked(QDate::currentDate());
 }
 
 Cal_30::~Cal_30()
@@ -29,9 +30,11 @@ void Cal_30::on_calendarWidget_clicked(const QDate &date)
     for (auto e : events) {
         event_entry *item = new event_entry(e, uid);
         connect(item, &event_entry::deleted, this, &Cal_30::eventDeleted);
+        connect(item, &event_entry::edited, this, &Cal_30::eventEdited);
         layout->addWidget(item);
     }
-    central->setLayout(layout);
+    layout->addStretch();
+    central->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
     ui->events_scroll->setWidget(central);
 }
 
@@ -43,4 +46,7 @@ void Cal_30::eventDeleted(event_entry* ev) {
         delete ev;
     }
     this->on_calendarWidget_clicked(ui->calendarWidget->selectedDate());
+}
+void Cal_30::eventEdited(event_entry* ev) {
+    on_calendarWidget_clicked(ui->calendarWidget->selectedDate());
 }

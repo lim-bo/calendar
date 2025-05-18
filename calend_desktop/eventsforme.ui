@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>eventsforme</class>
+ <widget class="QWidget" name="eventsforme">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>911</width>
+    <height>749</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QScrollArea" name="scrollArea_eventsforme">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>10</y>
+     <width>551</width>
+     <height>651</height>
+    </rect>
+   </property>
+   <property name="widgetResizable">
+    <bool>true</bool>
+   </property>
+   <widget class="QWidget" name="scrollAreaWidgetContents">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>549</width>
+      <height>649</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_not_accepted">
+   <property name="geometry">
+    <rect>
+     <x>601</x>
+     <y>87</y>
+     <width>296</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>События, где я участник (непринятые)</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_accepted">
+   <property name="geometry">
+    <rect>
+     <x>601</x>
+     <y>54</y>
+     <width>279</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>События, где я участник (принятые)</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_created">
+   <property name="geometry">
+    <rect>
+     <x>601</x>
+     <y>21</y>
+     <width>215</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>События, созданные мной</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -24,7 +24,7 @@ void auth::on_login_button_clicked()
     data.pass = ui->pass_edit->text();
     bool ok = cli.login(data, uid);
     if (!ok) {
-        ui->result->setText("ошибка");
+        ui->result->setText("Ошибка");
         ui->login_button->setEnabled(true);
     } else {
         *fl = true;
@@ -45,7 +45,7 @@ void auth::on_reg_button_clicked()
         data.t_name = fioParts[2];
     } else {
 
-        ui->result->setText("Введите ФИО полностью дуры");
+        ui->result->setText("Введите ФИО полностью");
         return;
     }
     data.department = ui->depart->text();
@@ -66,11 +66,11 @@ void auth::on_reg_button_clicked()
 void auth::on_checkBox_toggled(bool checked)
 {
     if (checked) {
-        ui->dura_box->setEnabled(true);
+        ui->box->setEnabled(true);
         ui->reg_button->setEnabled(true);
     }
     else {
-        ui->dura_box->setDisabled(true);
+        ui->box->setDisabled(true);
         ui->reg_button->setDisabled(true);
     }
 }

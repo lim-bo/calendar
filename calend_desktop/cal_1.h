@@ -4,6 +4,8 @@
 #include <QMessageBox>
 #include <QWidget>
 #include "event_entry.h"
+#include "client.h"
+#include "eventdata.h"
 
 namespace Ui {
 class cal_1;
@@ -20,6 +22,7 @@ private slots:
     void loadEventsForToday();
     void eventDeleted(event_entry* ev);
     void showEvent(QShowEvent *event);
+    void eventEdited(event_entry* ev);
 
 private:
     Ui::cal_1 *ui;

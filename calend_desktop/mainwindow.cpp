@@ -6,14 +6,15 @@ MainWindow::MainWindow(QWidget *parent)
 
 {
     ui->setupUi(this);
-    /*bool fl = false;
+    bool fl = false;
     QString uidProvided;
     auth auth_window(&fl, &uidProvided);
     auth_window.exec();
     if (!fl) {
         exit(0);
-    }*/
-    //this->uid = uidProvided;
+    }
+    this->uid = uidProvided;
+
     ui->frame->setLayout(new QVBoxLayout());
 }
 
@@ -34,7 +35,6 @@ void MainWindow::on_prof_button_2_clicked()
 void MainWindow::on_mycal_clicked()
 {
     int type = ui->caltype->currentIndex();
-    qDebug() << type;
 
     QLayoutItem* item;
     while ((item = ui->frame->layout()->takeAt(0)) != nullptr) {
@@ -74,3 +74,18 @@ void MainWindow::on_Event_push_clicked()
     ev->setAttribute(Qt::WA_DeleteOnClose);
     ev->show();
 }
+
+void MainWindow::on_my_events_clicked()
+{
+    QLayoutItem* item;
+    while ((item = ui->frame->layout()->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+    eventsforme *eventsWindow = new eventsforme(uid, this);
+    eventsWindow->setAttribute(Qt::WA_DeleteOnClose);
+    ui->frame->layout()->addWidget(eventsWindow);
+    eventsWindow->show();
+
+}
+

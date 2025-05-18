@@ -5,6 +5,12 @@
 #include <QListView>
 #include <QDateTime>
 #include <QStringList>
+
+struct Participant {
+    QString uid;
+    bool accepted;
+};
+
 struct EventData {
 
     enum Priority { High = 3, Medium = 2, Low = 1 };
@@ -17,7 +23,9 @@ struct EventData {
     Priority prior;
     QString desc;
     QString master;
-    QStringList parts;
+    QVector<Participant> parts;
+
+    QDateTime notificationTime;
 
 };
 

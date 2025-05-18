@@ -6,7 +6,6 @@ cal_1::cal_1(QString uid, QWidget *parent)
     , ui(new Ui::cal_1), cli(settings.value("host").toString(), settings.value("port").toString()), uid(uid)
 {
     ui->setupUi(this);
-
     ui->events_scroll->setWidgetResizable(true);
     loadEventsForToday();
 }
@@ -30,7 +29,6 @@ void cal_1::loadEventsForToday()
     QDate today = QDate::currentDate();
     QVector<EventData> events = cli.getEventsByDay(today, uid);
 
-
     if (events.isEmpty()) {
         QLabel *noEventsLabel = new QLabel("На сегодня событий нет");
         noEventsLabel->setAlignment(Qt::AlignCenter);
@@ -40,6 +38,7 @@ void cal_1::loadEventsForToday()
         for (const auto &e : events) {
             event_entry *item = new event_entry(e, uid);
             connect(item, &event_entry::deleted, this, &cal_1::eventDeleted);
+            connect(item, &event_entry::edited, this, &cal_1::eventEdited);
             layout->addWidget(item);
         }
     }
@@ -57,6 +56,11 @@ void cal_1::eventDeleted(event_entry* ev)
         delete ev;
     }
 
+    loadEventsForToday();
+}
+
+void cal_1::eventEdited(event_entry* ev)
+{
     loadEventsForToday();
 }
 

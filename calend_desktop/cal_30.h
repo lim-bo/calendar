@@ -7,6 +7,8 @@
 #include "event_entry.h"
 #include <QHBoxLayout>
 #include <QMessageBox>
+#include "event.h"
+#include "eventData.h"
 namespace Ui {
 class Cal_30;
 }
@@ -22,6 +24,7 @@ public:
 private slots:
     void on_calendarWidget_clicked(const QDate &date);
     void eventDeleted(event_entry*);
+    void eventEdited(event_entry*);
 private:
     Ui::Cal_30 *ui;
     Client cli;

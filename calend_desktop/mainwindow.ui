@@ -103,6 +103,19 @@
       </property>
      </item>
     </widget>
+    <widget class="QPushButton" name="my_events">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>250</y>
+       <width>101</width>
+       <height>29</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Мои события</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
