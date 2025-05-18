@@ -42,7 +42,7 @@ type UserManagerI interface {
 }
 
 type EventManagerI interface {
-	AddEvent(event *models.Event) error
+	AddEvent(event *models.Event) (primitive.ObjectID, error)
 	GetEvents(master uuid.UUID, flags map[string]bool) ([]*models.Event, error)
 	GetEventsByMonth(master uuid.UUID, month time.Month) ([]*models.Event, error)
 	DeleteEvent(master uuid.UUID, id primitive.ObjectID) error
@@ -154,6 +154,7 @@ func (api *API) MountEndpoint() {
 		r.Get("/{eventID}/parts", api.GetEventParticipants)
 		r.Get("/{uid}", api.GetEvents)
 		r.Post("/{eventID}/notify", api.SetNotification)
+		r.Get("/{eventID}", api.GetEvent)
 	})
 	api.r.Route("/chats", func(r chi.Router) {
 		r.Use(api.CORSMiddleware)

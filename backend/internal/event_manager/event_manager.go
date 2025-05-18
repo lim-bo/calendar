@@ -42,14 +42,14 @@ func New(cfg DBConfig) *EventManager {
 	}
 }
 
-func (em *EventManager) AddEvent(event *models.Event) error {
+func (em *EventManager) AddEvent(event *models.Event) (primitive.ObjectID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
-	_, err := em.cli.Database("calend_db").Collection("events").InsertOne(ctx, *event)
+	res, err := em.cli.Database("calend_db").Collection("events").InsertOne(ctx, *event)
 	if err != nil {
-		return errors.New("event manager error: " + err.Error())
+		return primitive.ObjectID{}, errors.New("event manager error: " + err.Error())
 	}
-	return nil
+	return res.InsertedID.(primitive.ObjectID), nil
 }
 
 func (em *EventManager) GetEventsByMonth(master uuid.UUID, month time.Month) ([]*models.Event, error) {

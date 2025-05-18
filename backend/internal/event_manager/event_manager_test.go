@@ -49,7 +49,7 @@ func TestAddEvent(t *testing.T) {
 		},
 		Participants: []models.Participant{{UID: uid, Accepted: true}},
 	}
-	err := em.AddEvent(event)
+	_, err := em.AddEvent(event)
 	if err != nil {
 		t.Error(err)
 	}

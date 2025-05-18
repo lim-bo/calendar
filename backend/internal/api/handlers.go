@@ -215,13 +215,14 @@ func (api *API) AddEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	event.EventBase = eventRequest.EventBase
 	event.Participants = parts
-	err = api.em.AddEvent(&event)
+	eventID, err := api.em.AddEvent(&event)
 	if err != nil {
 		slog.Error("event insertion error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"))
 		w.WriteHeader(http.StatusInternalServerError)
 		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
 		return
 	}
+	w.Header().Add("eventID", eventID.Hex())
 	slog.Info("event successfuly added", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/add"), slog.String("uid", event.Master.String()))
 }
 
@@ -710,6 +711,31 @@ func (api *API) SetNotification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slog.Info("successfuly set notification", slog.String("event", eventID.Hex()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}/notify"))
+}
+
+func (api *API) GetEvent(w http.ResponseWriter, r *http.Request) {
+	eventID, err := primitive.ObjectIDFromHex(r.PathValue("eventID"))
+	if err != nil {
+		slog.Error("get event request with invalid eventID in path", slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}"))
+		w.WriteHeader(http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, ErrBadRequest)
+		return
+	}
+	event, err := api.em.GetEventByID(eventID)
+	if err != nil {
+		slog.Error("error getting event", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrRepository)
+		return
+	}
+	err = sonic.ConfigDefault.NewEncoder(w).Encode(event)
+	if err != nil {
+		slog.Error("error marshalling event", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}"))
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, http.StatusInternalServerError, ErrResponse)
+		return
+	}
+	slog.Info("successfully provided event data", slog.String("eventID", eventID.Hex()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/{eventID}"))
 }
 
 func (api *API) CORSMiddleware(next http.Handler) http.Handler {
