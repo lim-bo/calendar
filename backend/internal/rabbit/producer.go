@@ -91,7 +91,7 @@ func (p *Producer) ProduceWithJSON(jsonMsg []byte) error {
 	if delayed {
 		delay := time.Until(msg.Deadline)
 		publishing.Headers = amqp.Table{
-			"x-delay": delay,
+			"x-delay": delay.Milliseconds(),
 		}
 	}
 	err = p.mqComponents.ch.PublishWithContext(ctx, "", p.mqComponents.q.Name, false, false, publishing)
