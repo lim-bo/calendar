@@ -3,14 +3,12 @@ package api
 import (
 	"log/slog"
 	"net/http"
-	"regexp"
+	"net/mail"
 
 	"github.com/bytedance/sonic"
 	"github.com/google/uuid"
 	"github.com/lim-bo/calendar/backend/models"
 )
-
-var emailRegExp = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$`)
 
 type ErrorResponse struct {
 	Status    int    `json:"cod"`
@@ -45,12 +43,13 @@ func WriteGetProfileResponse(w http.ResponseWriter, info *models.UserCredentials
 }
 
 func ValidateEmail(email string) bool {
-	return emailRegExp.MatchString(email)
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }
 
 func ValidateEmailMult(emails []string) bool {
 	for _, e := range emails {
-		if !emailRegExp.MatchString(e) {
+		if !ValidateEmail(e) {
 			return false
 		}
 	}
