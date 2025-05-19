@@ -151,7 +151,7 @@ bool Client::scheduleNotification(const QString& eventID, const QDateTime& deadl
 }
 
 EventData Client::getEventByID(const QString& eventID) {
-    QNetworkRequest req(QUrl("http://" + host + ":" + port + "/events/" + eventID));
+    QNetworkRequest req(QUrl("http://" + host + ":" + port + "/events/one" + eventID));
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     QNetworkReply *reply = am.get(req);
     QEventLoop loop;

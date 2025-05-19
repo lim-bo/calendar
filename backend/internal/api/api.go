@@ -154,7 +154,7 @@ func (api *API) MountEndpoint() {
 		r.Get("/{eventID}/parts", api.GetEventParticipants)
 		r.Get("/{uid}", api.GetEvents)
 		r.Post("/{eventID}/notify", api.SetNotification)
-		r.Get("/{eventID}", api.GetEvent)
+		r.Get("/one/{eventID}", api.GetEvent)
 	})
 	api.r.Route("/chats", func(r chi.Router) {
 		r.Use(api.CORSMiddleware)

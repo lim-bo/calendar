@@ -400,11 +400,15 @@ func (api *API) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var parts []models.Participant
-	for i, uid := range uids {
-		event.Participants = append(event.Participants, models.Participant{UID: uid, Accepted: event.Participants[i].Accepted})
+	parts = append(parts, models.Participant{
+		UID:      eventRequest.Master,
+		Accepted: false,
+	})
+	for _, uid := range uids {
+		parts = append(parts, models.Participant{UID: uid, Accepted: false})
 	}
 	event.EventBase = eventRequest.EventBase
-	event.Participants = append(parts, models.Participant{UID: eventRequest.Master, Accepted: false})
+	event.Participants = parts
 	err = api.em.UpdateEvent(&event)
 	if err != nil {
 		slog.Error("updating event error", slog.String("error_desc", err.Error()), slog.String("from", r.RemoteAddr), slog.String("endpoint", "events/update"))

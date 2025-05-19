@@ -36,10 +36,10 @@ event_entry::event_entry(EventData data, QString viewerUID,  QWidget *parent)
         ui->status->setText(isParticipant ? "Вас добавили участником" : "Вы не участник");
     }
 
-    isAccepted = false;
 
-    ui->checkBox->setChecked(isAccepted);
-    ui->checkBox->setText(isAccepted ? "Участие подтверждено" : "Подтвердждение участия");
+
+    ui->checkBox->setChecked(isParticipant);
+    ui->checkBox->setText(isParticipant ? "Участие подтверждено" : "Подтвердждение участия");
 
 
     connect(ui->checkBox, &QCheckBox::stateChanged, this, &event_entry::on_checkBox_stateChanged);
