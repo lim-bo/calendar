@@ -28,7 +28,7 @@ void profile::on_pushButton_clicked()
         data.t_name = fioParts[2];
     } else {
 
-        ui->result->setText("Введите ФИО полностью дуры");
+        ui->result->setText("Введите ФИО полностью");
         return;
     }
     bool ok = cli.update(data, uid);
