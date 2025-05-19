@@ -33,7 +33,7 @@ void profile::on_pushButton_clicked()
     }
     bool ok = cli.update(data, uid);
     if (!ok) {
-        ui->result->setText("ну и дура");
+        ui->result->setText("Ошибка");
         ui->pushButton->setEnabled(true);
     }
     else{
