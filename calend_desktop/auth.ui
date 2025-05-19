@@ -106,7 +106,7 @@
       <item row="8" column="1">
        <widget class="QPushButton" name="reg_button">
         <property name="text">
-         <string>Зарегаться</string>
+         <string>Зарегистрироваться</string>
         </property>
        </widget>
       </item>
